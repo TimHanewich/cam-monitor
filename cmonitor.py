@@ -30,8 +30,6 @@ def upload(data:bytes) -> None:
     if cc.exists() == False:
         cc.create_container()
     blob_name:str = timestamp() + ".jpg"
-    print("Blob name: " + blob_name)
-    input("YEAH?")
     bc:BlobClient = cc.get_blob_client()
     bc.upload_blob(data)
 
@@ -59,4 +57,3 @@ def MONITOR() -> None:
             to_wait:int = int(time.time() - started_waiting_at)
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
-MONITOR()
