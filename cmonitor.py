@@ -4,10 +4,15 @@ import datetime
 import time
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
 
+
+########### SETTINGS ###############
+capture_delay:int = 60 # number of seconds in between captures and uploads
+capture_command:str = "fswebcam -d /dev/video1 --no-banner -r 160x120 img.jpg" # must name the image "img.jpg" for it to be recognized!
+####################################
+
 def capture() -> bytes:
     """Makes a command line command to capture an image using fswebcam and returns the file content as bytes"""
-    cmd = "fswebcam -d /dev/video1 --no-banner -r 160x120 img.jpg"
-    subprocess.run(cmd, shell=True, capture_output=True, text=True) # run the command
+    subprocess.run(capture_command, shell=True, capture_output=True, text=True) # run the command
     with open("./img.jpg", "rb") as file:
         file_content = file.read() # save the file content into memory
     os.remove("./img.jpg") # delete the file
@@ -37,7 +42,6 @@ def MONITOR() -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
     
     imgnum:int = 1
-    delay:int = 60 # delay in between captures, in seconds
     while True:
 
         # capture
@@ -53,7 +57,7 @@ def MONITOR() -> None:
         # wait
         imgnum = imgnum + 1
         started_waiting_at:float = time.time()
-        while (time.time() - started_waiting_at) < delay:
+        while (time.time() - started_waiting_at) < capture_delay:
             to_wait:int = int(time.time() - started_waiting_at)
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
