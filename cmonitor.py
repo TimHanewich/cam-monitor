@@ -1,6 +1,7 @@
 import subprocess
 import os
 import datetime
+import time
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
 
 def capture() -> bytes:
@@ -30,3 +31,28 @@ def upload(data:bytes) -> None:
         cc.create_container()
     bc:BlobClient = cc.get_blob_client(timestamp() + ".jpg")
     bc.upload_blob(data)
+
+def MONITOR() -> None:
+    """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
+    
+    imgnum:int = 1
+    delay:int = 60 # delay in between captures, in seconds
+    while True:
+
+        # capture
+        print("Capturing image # " + str(imgnum) + "... ")
+        img:bytes = capture()
+        print("\tImage of " + str(len(img)) + " bytes captured!")
+
+        # upload
+        print("\tUploading image... ")
+        upload(img)
+        print("\tUpload of image # " + str(imgnum) + " success!")
+
+        # wait
+        imgnum = imgnum + 1
+        started_waiting_at:float = time.time()
+        while (time.time() - started_waiting_at) < delay:
+            to_wait:int = int(time.time() - started_waiting_at)
+            print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
+            time.sleep(1)
