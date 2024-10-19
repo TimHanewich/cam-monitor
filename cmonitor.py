@@ -1,5 +1,7 @@
 import subprocess
 import os
+import datetime
+from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
 
 def capture() -> bytes:
     """Makes a command line command to capture an image using fswebcam and returns the file content as bytes"""
@@ -16,3 +18,7 @@ def getazblobconstr() -> str:
     ToReturn:str = f.read()
     f.close()
     return ToReturn
+
+def timestamp() -> str:
+    """Returns UTC date/time stamp in YYYYMMDDHHSS format."""
+    return datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
