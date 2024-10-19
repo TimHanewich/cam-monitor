@@ -22,3 +22,11 @@ def getazblobconstr() -> str:
 def timestamp() -> str:
     """Returns UTC date/time stamp in YYYYMMDDHHSS format."""
     return datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
+
+def upload(data:bytes) -> None:
+    bsc:BlobServiceClient = BlobServiceClient.from_connection_string(getazblobconstr())
+    cc:ContainerClient = bsc.get_container_client("cmonitor_images")
+    if cc.exists() == False:
+        cc.create_container()
+    bc:BlobClient = cc.get_blob_client(timestamp() + ".jpg")
+    bc.upload_blob(data)
