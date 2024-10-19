@@ -26,7 +26,7 @@ def timestamp() -> str:
 
 def upload(data:bytes) -> None:
     bsc:BlobServiceClient = BlobServiceClient.from_connection_string(getazblobconstr())
-    cc:ContainerClient = bsc.get_container_client("cmonitor_images")
+    cc:ContainerClient = bsc.get_container_client("cmonitor-images")
     if cc.exists() == False:
         cc.create_container()
     blob_name:str = timestamp() + ".jpg"
