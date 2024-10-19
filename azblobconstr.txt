@@ -1,0 +1,1 @@
+(put your azure blob storage connection string in this file)
