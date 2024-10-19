@@ -38,7 +38,7 @@ def upload(data:bytes) -> None:
     bc:BlobClient = cc.get_blob_client(blob_name)
     bc.upload_blob(data)
 
-def MONITOR() -> None:
+def monitor() -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
     
     imgnum:int = 1
