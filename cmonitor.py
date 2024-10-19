@@ -56,3 +56,4 @@ def MONITOR() -> None:
             to_wait:int = int(time.time() - started_waiting_at)
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
+MONITOR()
