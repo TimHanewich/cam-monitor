@@ -29,7 +29,10 @@ def upload(data:bytes) -> None:
     cc:ContainerClient = bsc.get_container_client("cmonitor_images")
     if cc.exists() == False:
         cc.create_container()
-    bc:BlobClient = cc.get_blob_client(timestamp() + ".jpg")
+    blob_name:str = timestamp() + ".jpg"
+    print("Blob name: " + blob_name)
+    input("YEAH?")
+    bc:BlobClient = cc.get_blob_client()
     bc.upload_blob(data)
 
 def MONITOR() -> None:
