@@ -18,7 +18,7 @@ def getazblobconstr() -> str:
     f = open("./azblobconstr.txt", "rt")
     ToReturn:str = f.read()
     f.close()
-    return ToReturn
+    return ToReturn.replace("\n", "")
 
 def timestamp() -> str:
     """Returns UTC date/time stamp in YYYYMMDDHHSS format."""
