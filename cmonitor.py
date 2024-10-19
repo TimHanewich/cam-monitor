@@ -9,3 +9,10 @@ def capture() -> bytes:
         file_content = file.read() # save the file content into memory
     os.remove("./img.jpg") # delete the file
     return file_content
+
+def getazblobconstr() -> str:
+    """Retrieves Azure Blob Storage connection string from local file."""
+    f = open("./azblobconstr.txt", "rt")
+    ToReturn:str = f.read()
+    f.close()
+    return ToReturn
