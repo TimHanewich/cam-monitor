@@ -58,6 +58,6 @@ def MONITOR() -> None:
         imgnum = imgnum + 1
         started_waiting_at:float = time.time()
         while (time.time() - started_waiting_at) < capture_delay:
-            to_wait:int = int(time.time() - started_waiting_at)
+            to_wait:int = capture_delay - int(time.time() - started_waiting_at)
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
