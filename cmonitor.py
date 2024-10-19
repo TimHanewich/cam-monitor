@@ -30,7 +30,7 @@ def upload(data:bytes) -> None:
     if cc.exists() == False:
         cc.create_container()
     blob_name:str = timestamp() + ".jpg"
-    bc:BlobClient = cc.get_blob_client()
+    bc:BlobClient = cc.get_blob_client(blob_name)
     bc.upload_blob(data)
 
 def MONITOR() -> None:
