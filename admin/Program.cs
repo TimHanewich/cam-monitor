@@ -110,7 +110,7 @@ namespace CMonitorAdministration
 
                 //Print
                 Console.WriteLine();
-                AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + DownloadPath + "'![/]");
+                AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
                 Console.WriteLine();
             }
         }
