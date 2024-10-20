@@ -89,11 +89,16 @@ namespace CMonitorAdministration
                 AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + PhotosToDownload.Count.ToString("#,##0") + "[/][/] over [bold][navy]" + AllDatesToGet.Length.ToString("#,##0") + "[/][/] dates!");
                 for (int t = 0; t < PhotosToDownload.Count; t++)
                 {    
+
+                    //Print what we're doing
                     string blobname = PhotosToDownload[t];
+                    float percent = Convert.ToSingle(t) / Convert.ToSingle(PhotosToDownload.Count);
+                    AnsiConsole.Markup("[gray](" + t.ToString("#,##0") + " / " + PhotosToDownload.Count.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/]" + " Downloading [bold][navy]" + blobname + "[/][/]... ");
+                    
+                    //Download!
                     string destpath = Path.Combine(DownloadPath, blobname);
                     FileStream fs = System.IO.File.Create(destpath); //Create the file
                     fs.Close();
-                    AnsiConsole.Markup("Downloading [bold][navy]" + blobname + "[/][/]... ");
                     BlobClient bc = bcc.GetBlobClient(blobname);
                     if (await bc.ExistsAsync() == false)
                     {
