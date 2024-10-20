@@ -84,7 +84,7 @@ namespace CMonitorAdministration
                     Console.ReadLine();
 
                     //Make a folder for us to download in
-                    string DownloadPath = Path.Combine("./", "download-" + Guid.NewGuid().ToString().Replace("-", ""));
+                    string DownloadPath = Path.Combine("download-" + Guid.NewGuid().ToString().Replace("-", ""));
                     System.IO.Directory.CreateDirectory(DownloadPath);
 
                     //Download all
@@ -115,6 +115,61 @@ namespace CMonitorAdministration
                     Console.WriteLine();
                     AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
                     Console.WriteLine();
+
+                    //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
+                    SelectionPrompt<string> RenameOption = new SelectionPrompt<string>();
+                    RenameOption.Title("Do you also want to rename them in order of oldest to newest (i.e. '0000001', '0000002', '0000003', etc.)");
+                    RenameOption.AddChoice("Yes");
+                    RenameOption.AddChoice("No");
+                    string RenameOptionSelection = AnsiConsole.Prompt(RenameOption);
+                    if (RenameOptionSelection == "Yes")
+                    {
+                        //Get all files
+                        string[] allfiles = System.IO.Directory.GetFiles(DownloadPath);
+
+                        //Construct dict of datetimes
+                        Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
+                        foreach (string file in allfiles)
+                        {
+                            string name = System.IO.Path.GetFileNameWithoutExtension(file);
+                            DateTime ts = TimeStamper.TimeStampToDateTime(name);
+                            FileDateTimes[file] = ts;
+                        }
+
+                        //Arrange in order from oldest to newest
+                        List<string> FilesToRename = new List<string>(); // In order from oldest to newest
+                        while (FileDateTimes.Count > 0)
+                        {
+                            KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
+                            foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
+                            {
+                                if (kvp.Value < winner.Value)
+                                {
+                                    winner = kvp;
+                                }
+                            }
+                            FilesToRename.Add(winner.Key); //Add it
+                            FileDateTimes.Remove(winner.Key); //Remove
+                        }
+
+                        //Rename each!
+                        int ticker = 0;
+                        foreach (string file in FilesToRename)
+                        {
+                            string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
+                            if (dir != null)
+                            {
+                                string path_old = file;
+                                string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
+                                AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
+                                System.IO.File.Move(path_old, path_new); //rename
+                                AnsiConsole.MarkupLine("Success!");
+                                ticker = ticker + 1;
+                            }
+                        }
+
+                        Console.WriteLine();
+                    }      
                 }
                 else if (WantToDo == "Check most recent image upload")
                 {
