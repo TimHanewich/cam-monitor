@@ -158,12 +158,18 @@ namespace CMonitorAdministration
 
                                 //Return the most recent
                                 TimeSpan ts = DateTime.UtcNow - MostRecent;
-                                AnsiConsole.MarkupLine("The last picture that was taken was taken at " + MostRecent.ToString() + " UTC");
-                                AnsiConsole.MarkupLine("That was " + ts.TotalMinutes.ToString("#,##0") + " minutes ago!");
+                                AnsiConsole.MarkupLine("The last picture that was taken was taken at [bold]" + MostRecent.ToString() + "[/] UTC");
+                                AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
                                 Console.WriteLine();
                                 answered = true; //Mark as answered so other loops know to ignore!
                             }
                         }
+                    }
+
+                    //If still not answered, say it was before the oldest time we checked
+                    if (answered == false)
+                    {
+                        AnsiConsole.MarkupLine("[red]I looked as far back as " + ToSearch[0].ToShortDateString() + " and was unable to find a photo taken! The most recent photo was likely taken before then.[/]");
                     }
                 }
                 else
