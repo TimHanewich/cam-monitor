@@ -53,14 +53,13 @@ namespace CMonitorAdministration
                 }
 
                 //Get in between dates
+                Console.WriteLine();
                 DateTime[] AllDatesToGet = GetDatesBetween(starting, ending);
                 AnsiConsole.MarkupLine("Going to download [bold]" + AllDatesToGet.Length.ToString("#,##0") + "[/] days worth of photos:");
                 foreach (DateTime dt in AllDatesToGet)
                 {
                     Console.WriteLine("- " + dt.ToShortDateString());
                 }
-
-                
 
                 //Get list of all photos
                 List<string> PhotosToDownload = new List<string>();
@@ -86,6 +85,7 @@ namespace CMonitorAdministration
                 System.IO.Directory.CreateDirectory(DownloadPath);
 
                 //Download all
+                Console.WriteLine();
                 AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + PhotosToDownload.Count.ToString("#,##0") + "[/][/] over [bold][navy]" + AllDatesToGet.Length.ToString("#,##0") + "[/][/] dates!");
                 for (int t = 0; t < PhotosToDownload.Count; t++)
                 {    
