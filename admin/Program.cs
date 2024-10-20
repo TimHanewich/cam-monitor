@@ -100,8 +100,13 @@ namespace CMonitorAdministration
                         continue;
                     }
                     await bc.DownloadToAsync(destpath);
-                    AnsiConsole.Markup("[green]Downloaded![/]");
+                    AnsiConsole.MarkupLine("[green]Downloaded![/]");
                 }
+
+                //Print
+                Console.WriteLine();
+                AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + DownloadPath + "'![/]");
+                Console.WriteLine();
             }
         }
 
