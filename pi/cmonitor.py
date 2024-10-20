@@ -2,7 +2,7 @@ import subprocess
 import os
 import datetime
 import time
-from azure.storage.blob import BlobServiceClient, ContainerClient, BlobBlock, BlobClient, StandardBlobTier
+from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 
 ########### SETTINGS ###############
 capture_delay:int = 60 # number of seconds in between captures and uploads
