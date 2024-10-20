@@ -217,7 +217,15 @@ namespace CMonitorAdministration
                                 //Return the most recent
                                 TimeSpan ts = DateTime.UtcNow - MostRecent;
                                 AnsiConsole.MarkupLine("The last picture that was taken was taken at [bold]" + MostRecent.ToString() + "[/] UTC");
-                                AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
+                                if (ts.TotalMinutes <= 1)
+                                {
+                                    AnsiConsole.MarkupLine("That was [bold]" + ts.TotalSeconds.ToString("#,##0") + " seconds ago![/]");
+                                }
+                                else // 2 or more minutes
+                                {
+                                    AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
+                                }
+                                
                                 Console.WriteLine();
                                 answered = true; //Mark as answered so other loops know to ignore!
                             }
