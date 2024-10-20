@@ -4,4 +4,4 @@ A simple project that uses a USB webcam connected to a Single Board Computer (SB
 This project has two projects within:
 - **[pi](./pi/)** - Python code that runs on the SBC (an Orange Pi 3 LTS, in my case) and performs the capturing and uploading.
     - Only dependency: [azure.storage.blob](https://pypi.org/project/azure-storage-blob/).
-- [admin](./admin/) - .NET console app for downloading photos stored in Azure Blob Storage.
+- **[admin](./admin/)** - .NET console app for downloading photos stored in Azure Blob Storage.
