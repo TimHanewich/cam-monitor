@@ -234,7 +234,7 @@ namespace CMonitorAdministration
                 else if (WantToDo == "Exit")
                 {
                     Console.WriteLine();
-                    AnsiConsole.MarkupLine("[bold]Bye bye![/][/]");
+                    AnsiConsole.MarkupLine("[bold]Bye bye![/]");
                     Environment.Exit(0);
                 }
                 else
