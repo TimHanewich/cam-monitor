@@ -18,10 +18,14 @@ namespace CMonitorAdministration
         {
             while (true)
             {
+                //Set up ask
+                Console.Clear();
                 SelectionPrompt<string> ToDo = new SelectionPrompt<string>();
+                AnsiConsole.MarkupLine("[bold][underline]Welcome to CMonitor Admin Application![/][/]");
                 ToDo.Title("What do you want to do?");
                 ToDo.AddChoice("Download images between a date range");
                 ToDo.AddChoice("Check most recent image upload");
+                ToDo.AddChoice("Exit");
 
                 //Ask
                 string WantToDo = AnsiConsole.Prompt(ToDo);
@@ -226,6 +230,12 @@ namespace CMonitorAdministration
                     {
                         AnsiConsole.MarkupLine("[red]I looked as far back as " + ToSearch[0].ToShortDateString() + " and was unable to find a photo taken! The most recent photo was likely taken before then.[/]");
                     }
+                }
+                else if (WantToDo == "Exit")
+                {
+                    Console.WriteLine();
+                    AnsiConsole.MarkupLine("[bold]Bye bye![/][/]");
+                    Environment.Exit(0);
                 }
                 else
                 {
