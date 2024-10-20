@@ -20,7 +20,7 @@ def capture() -> bytes:
 
 def getazblobconstr() -> str:
     """Retrieves Azure Blob Storage connection string from local file."""
-    f = open("./azblobconstr.txt", "rt")
+    f = open("../azblobconstr.txt", "rt")
     ToReturn:str = f.read()
     f.close()
     return ToReturn.replace("\n", "")
