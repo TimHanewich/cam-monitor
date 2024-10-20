@@ -78,7 +78,7 @@ namespace CMonitorAdministration
 
                 //Ready!
                 Console.WriteLine();
-                AnsiConsole.Markup("[italic][gray]Ready to download [bold][navy]" + PhotosToDownload.Count.ToString("#,##0") + " photos[/][/]when you are. Enter to proceed.[/][/]");
+                AnsiConsole.Markup("[italic][gray]Ready to download [navy]" + PhotosToDownload.Count.ToString("#,##0") + " photos[/] when you are. Enter to proceed.[/][/]");
                 Console.ReadLine();
 
                 //Make a folder for us to download in
