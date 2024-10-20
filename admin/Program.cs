@@ -19,7 +19,6 @@ namespace CMonitorAdministration
             while (true)
             {
                 //Set up ask
-                Console.Clear();
                 SelectionPrompt<string> ToDo = new SelectionPrompt<string>();
                 AnsiConsole.MarkupLine("[bold][underline]Welcome to CMonitor Admin Application![/][/]");
                 ToDo.Title("What do you want to do?");
@@ -241,6 +240,12 @@ namespace CMonitorAdministration
                 {
                     Console.WriteLine("I don't know what that is!");
                 }
+
+                //Enter to continue
+                Console.WriteLine();
+                AnsiConsole.Markup("[gray][italic]Enter to continue...[/][/]");
+                Console.ReadLine();
+                Console.Clear();
             }
         }
 
