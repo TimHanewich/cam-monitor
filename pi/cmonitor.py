@@ -6,7 +6,7 @@ from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 
 ########### SETTINGS ###############
 capture_delay:int = 60 # number of seconds in between captures and uploads
-capture_command:str = "fswebcam -d /dev/video1 --no-banner -r 1280x720 img.jpg" # must name the image "img.jpg" for it to be recognized!
+capture_command:str = "fswebcam -d /dev/video1 -r 1280x720 img.jpg" # must name the image "img.jpg" for it to be recognized!
 ####################################
 
 def capture() -> bytes:
