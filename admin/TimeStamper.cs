@@ -4,8 +4,11 @@ namespace CMonitorAdministration
 {
     public class TimeStamper
     {
-        public static string DateTimeToTimeStamp(DateTime dt)
+        public static string DateTimeToTimeStamp(DateTime dt, Depth depth = Depth.Seconds)
         {
+            //Depth
+            
+
             return dt.Year.ToString("0000") + dt.Month.ToString("00") + dt.Day.ToString("00") + dt.Hour.ToString("00") + dt.Second.ToString("00");
         }
 
