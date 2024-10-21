@@ -121,9 +121,10 @@ namespace CMonitorAdministration
                     }
 
                     //Print
+                    float mb_downloaded = Convert.ToSingle(BytesDownloaded) / Convert.ToSingle(1048576);
                     Console.WriteLine();
                     AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
-                    AnsiConsole.MarkupLine("[green]" + BytesDownloaded.ToString("#,##0") + " bytes downloaded![/]");
+                    AnsiConsole.MarkupLine("[green]" + mb_downloaded.ToString("#,##0.0") + " MB downloaded![/]");
                     Console.WriteLine();
 
                     //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
