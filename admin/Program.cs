@@ -93,6 +93,7 @@ namespace CMonitorAdministration
                     //Download all
                     Console.WriteLine();
                     AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + PhotosToDownload.Count.ToString("#,##0") + "[/][/] over [bold][navy]" + AllDatesToGet.Length.ToString("#,##0") + "[/][/] dates!");
+                    int BytesDownloaded = 0;
                     for (int t = 0; t < PhotosToDownload.Count; t++)
                     {    
 
@@ -115,12 +116,14 @@ namespace CMonitorAdministration
                         fs.Close();
                         ms.Close();
                         await bc.DownloadToAsync(destpath);
+                        BytesDownloaded = BytesDownloaded + Convert.ToInt32(ms.Length);
                         AnsiConsole.MarkupLine("[green]Downloaded![/]");
                     }
 
                     //Print
                     Console.WriteLine();
                     AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
+                    AnsiConsole.MarkupLine("[green]" + BytesDownloaded.ToString("#,##0") + " bytes downloaded![/]");
                     Console.WriteLine();
 
                     //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
