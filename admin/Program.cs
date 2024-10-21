@@ -106,6 +106,7 @@ namespace CMonitorAdministration
                         BlobClient bc = bcc.GetBlobClient(blobname);
                         MemoryStream ms = new MemoryStream();
                         await bc.DownloadToAsync(ms);
+                        BytesDownloaded = BytesDownloaded + Convert.ToInt32(ms.Length);
 
                         //Write into file
                         string destpath = Path.Combine(DownloadPath, blobname);
@@ -116,7 +117,6 @@ namespace CMonitorAdministration
                         fs.Close();
                         ms.Close();
                         await bc.DownloadToAsync(destpath);
-                        BytesDownloaded = BytesDownloaded + Convert.ToInt32(ms.Length);
                         AnsiConsole.MarkupLine("[green]Downloaded![/]");
                     }
 
