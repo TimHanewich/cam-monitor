@@ -101,15 +101,19 @@ namespace CMonitorAdministration
                         float percent = Convert.ToSingle(t) / Convert.ToSingle(PhotosToDownload.Count);
                         AnsiConsole.Markup("[gray](" + t.ToString("#,##0") + " / " + PhotosToDownload.Count.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/]" + " Downloading [bold][navy]" + blobname + "[/][/]... ");
                         
-                        //Download!
+                        //Download into memory stream
+                        BlobClient bc = bcc.GetBlobClient(blobname);
+                        MemoryStream ms = new MemoryStream();
+                        await bc.DownloadToAsync(ms);
+
+                        //Write into file
                         string destpath = Path.Combine(DownloadPath, blobname);
                         FileStream fs = System.IO.File.Create(destpath); //Create the file
+                        fs.Position = 0;
+                        ms.Position = 0;
+                        ms.CopyTo(fs);
                         fs.Close();
-                        BlobClient bc = bcc.GetBlobClient(blobname);
-                        if (await bc.ExistsAsync() == false)
-                        {
-                            continue;
-                        }
+                        ms.Close();
                         await bc.DownloadToAsync(destpath);
                         AnsiConsole.MarkupLine("[green]Downloaded![/]");
                     }
