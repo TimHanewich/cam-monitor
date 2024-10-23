@@ -16,3 +16,6 @@ The above command is described as:
 - `-i %08d.jpg` specifies the input image sequence where 00000000.jpg, 00000001.jpg, etc., are the files.
 - `-r 30` specificies the framerate: how many frames, or pictures, should be included in 1 second of the video. For example, if you had 30 photos and set the framerate to 30, the video would last 1 second.
 - `output.mp4` (name at the end) defines the name.
+
+## 3D-Printed Frame
+I designed and printed [this frame](https://www.thingiverse.com/thing:6806473) that holds my Logitech C270 webcam against the window for a timelapse.
