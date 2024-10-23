@@ -49,15 +49,32 @@ def monitor() -> None:
         print("\tImage of " + str(len(img)) + " bytes captured!")
 
         # upload
-        print("\tUploading image... ")
-        upload(img)
-        print("\tUpload of image # " + str(imgnum) + " success!")
+        upload_successful:bool = False
+        try:
+            t = 1 / 0
+            print("\tUploading image... ")
+            upload(img)
+            print("\tUpload of image # " + str(imgnum) + " success!")
+            upload_successful = True
+        except Exception as e:
+            print("Error while uploading! Msg: " + str(e))
+            upload_successful = False
+
+        # if upload was unsuccessful, save the photo to the hopper
+        if upload_successful == False:
+            print("Saving to hopper...")
+            savepath = "./hopper/" + timestamp() + ".jpg"
+            si = open(savepath, "wb")
+            si.write(img)
+            si.close()
+            print("Saved to '" + savepath + "'!")
 
         # wait
-        imgnum = imgnum + 1
-        started_waiting_at:float = time.time()
-        while (time.time() - started_waiting_at) < capture_delay:
-            to_wait:int = capture_delay - int(time.time() - started_waiting_at)
-            print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
-            time.sleep(1)
+            imgnum = imgnum + 1
+            started_waiting_at:float = time.time()
+            while (time.time() - started_waiting_at) < capture_delay:
+                to_wait:int = capture_delay - int(time.time() - started_waiting_at)
+                print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
+                time.sleep(1)
+
 monitor()
