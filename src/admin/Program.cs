@@ -266,7 +266,45 @@ namespace CMonitorAdministration
         }
 
 
+        //Upload all
+        public static async Task UploadAllFromFolderAsync(string folder)
+        {
+            string[] files = System.IO.Directory.GetFiles(folder);
+            Console.WriteLine("Found " + files.Length.ToString("#,##0") + " files in this folder!");
 
+            //Authenticate w/ azure blob storage
+            AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
+            BlobServiceClient bsc = new BlobServiceClient(GetAzureBlobStorageConnectionString());
+            BlobContainerClient bcc = bsc.GetBlobContainerClient("cmonitor-images");
+            if (await bcc.ExistsAsync() == false)
+            {
+                await bcc.CreateAsync();
+            }
+            AnsiConsole.MarkupLine("[green]set up![/]");
+
+            //Upload each
+            for (int t = 0; t < files.Length; t++)
+            {
+                string path = files[t];
+                string name = System.IO.Path.GetFileName(path);
+
+                //Get blob
+                BlobClient bc = bcc.GetBlobClient(name);
+                if (bc.Exists() == false)
+                {
+                    float percent_complete = Convert.ToSingle(t) / Convert.ToSingle(files.Length);
+                    Console.Write(percent_complete.ToString("#0.0%") + "% - " + "Uploading '" + name + "'... ");
+                    Stream s = System.IO.File.OpenRead(path);
+                    await bc.UploadAsync(s);
+                    s.Close();
+                    Console.WriteLine("Success!");
+                }
+                else
+                {
+                    Console.WriteLine("Blob '" + name + "' already exists!");
+                }
+            }
+        }
 
         //Retrieves azure blob storage connection string from azblobconstr.txt in parent directory
         public static string GetAzureBlobStorageConnectionString()
