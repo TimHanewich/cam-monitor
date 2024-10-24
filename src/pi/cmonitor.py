@@ -63,8 +63,9 @@ def monitor() -> None:
         # if upload was unsuccessful, save the photo to the hopper
         if upload_successful == False:
             print("Saving to hopper...")
-            savepath = "./hopper/" + timestamp() + ".jpg"
-            si = open(savepath, "wb")
+            os.makedirs("./hopper", exist_ok=True) # create the hopper folder if if does not exist (exist_ok=True means it will be okay if it already exists)
+            savepath = "./hopper/" + timestamp() + ".jpg" # create the full path
+            si = open(savepath, "wb") # create the file in the hopper folder
             si.write(img)
             si.close()
             print("Saved locally to '" + savepath + "'!")
