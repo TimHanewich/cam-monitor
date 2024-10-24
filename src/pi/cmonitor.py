@@ -51,7 +51,6 @@ def monitor() -> None:
         # upload
         upload_successful:bool = False
         try:
-            t = 1 / 0
             print("\tUploading image... ")
             upload(img)
             print("\tUpload of image # " + str(imgnum) + " success!")
