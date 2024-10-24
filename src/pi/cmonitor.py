@@ -89,18 +89,24 @@ def check_hopper() -> None:
             if i.lower() == "y":
 
                 # upload and delete every one
-                for file in files:
+                for i in range(files):
+                    file:str = files[i]
+
+                    # Calculate percent complete
+                    percent_complete:float = i / len(files)
+                    percent_complete_str:str = str(round(percent_complete * 100, 1)) + "%"
 
                     # upload
                     f = open("./hopper/" + file, "rb")
                     data:bytes = f.read()
-                    print("Uploading '" + file + "'... ")
+                    print("(" + str(i) + " / " + str(len(file)) + ", " + percent_complete_str + ") " + "Uploading '" + file + "'... ", end="")
                     upload(data, file) # upload the file (and pass the file name to it so it uses that file name, not the current time)
                     f.close() # close the file
 
                     # delete
-                    print("Deleting '" + file + "'... ")
+                    print("Deleting... ", end="")
                     os.remove("./hopper/" + file)
+                    print("Success!")
 
                 # after its all done, now stop
                 i = input("Hopper fully uploaded! Would you like to continue with the monitor program now? (y/n) > ")
