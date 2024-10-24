@@ -67,7 +67,7 @@ def monitor() -> None:
             si = open(savepath, "wb")
             si.write(img)
             si.close()
-            print("Saved to '" + savepath + "'!")
+            print("Saved locally to '" + savepath + "'!")
 
         # wait
             imgnum = imgnum + 1
