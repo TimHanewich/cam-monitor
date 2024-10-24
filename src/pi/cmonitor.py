@@ -57,18 +57,18 @@ def monitor() -> None:
             print("\tUpload of image # " + str(imgnum) + " success!")
             upload_successful = True
         except Exception as e:
-            print("Error while uploading! Msg: " + str(e))
+            print("\tError while uploading! Msg: " + str(e))
             upload_successful = False
 
         # if upload was unsuccessful, save the photo to the hopper
         if upload_successful == False:
-            print("Saving to hopper...")
+            print("\tSaving to hopper...")
             os.makedirs("./hopper", exist_ok=True) # create the hopper folder if if does not exist (exist_ok=True means it will be okay if it already exists)
             savepath = "./hopper/" + timestamp() + ".jpg" # create the full path
             si = open(savepath, "wb") # create the file in the hopper folder
             si.write(img)
             si.close()
-            print("Saved locally to '" + savepath + "'!")
+            print("\tSaved locally to '" + savepath + "'!")
 
         # wait
             imgnum = imgnum + 1
