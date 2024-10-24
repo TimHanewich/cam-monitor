@@ -101,9 +101,6 @@ def check_hopper() -> None:
                     # delete
                     print("Deleting '" + file + "'... ")
                     os.remove("./hopper/" + file)
-                
-                # delete the hopper
-                os.rmdir("./hopper")
 
                 # after its all done, now stop
                 i = input("Hopper fully uploaded! Would you like to continue with the monitor program now? (y/n) > ")
