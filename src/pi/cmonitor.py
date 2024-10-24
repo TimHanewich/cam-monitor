@@ -28,12 +28,13 @@ def timestamp() -> str:
     """Returns UTC date/time stamp in YYYYMMDDHHSS format."""
     return datetime.datetime.utcnow().strftime("%Y%m%d%H%M%S")
 
-def upload(data:bytes) -> None:
+def upload(data:bytes, blob_name:str = None) -> None:
     bsc:BlobServiceClient = BlobServiceClient.from_connection_string(getazblobconstr())
     cc:ContainerClient = bsc.get_container_client("cmonitor-images")
     if cc.exists() == False:
         cc.create_container()
-    blob_name:str = timestamp() + ".jpg"
+    if blob_name == None:
+        blob_name = timestamp() + ".jpg"
     bc:BlobClient = cc.get_blob_client(blob_name)
     bc.upload_blob(data)
 
@@ -88,15 +89,14 @@ def check_hopper() -> None:
                 for file in files:
 
                     # upload
-                    file_name:str = os.path.basename(file)
-                    f = open(file, "rb")
+                    f = open("./hopper/" + file, "rb")
                     data:bytes = f.read()
-                    print("Uploading '" + file_name + "'... ")
-                    upload(data) # upload the file
+                    print("Uploading '" + file + "'... ")
+                    upload(data, file) # upload the file (and pass the file name to it so it uses that file name, not the current time)
                     f.close() # close the file
 
                     # delete
-                    print("Deleting '" + file_name + "'... ")
+                    print("Deleting '" + file + "'... ")
                     os.remove(file)
 
                 # after its all done, now stop
