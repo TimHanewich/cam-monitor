@@ -36,7 +36,10 @@ def upload(data:bytes, blob_name:str = None) -> None:
     if blob_name == None:
         blob_name = timestamp() + ".jpg"
     bc:BlobClient = cc.get_blob_client(blob_name)
-    bc.upload_blob(data)
+    if bc.exists():
+        print("Not uploading data of length " + str(len(data)) + "! Blob already exists!")
+    else:
+        bc.upload_blob(data)
 
 def monitor() -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
