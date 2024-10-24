@@ -77,4 +77,36 @@ def monitor() -> None:
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
 
+def check_hopper() -> None:
+    if os.path.exists("./hopper"):
+        files:list[str] = os.listdir("./hopper")
+        if len(files) > 0:
+            i = input("There are " + len(files) + " in the hopper. Would you like to upload those now? (y/n) > ")
+            if i.lower() == "y":
+
+                # upload and delete every one
+                for file in files:
+
+                    # upload
+                    file_name:str = os.path.basename(file)
+                    f = open(file, "rb")
+                    data:bytes = f.read()
+                    print("Uploading '" + file_name + "'... ")
+                    upload(data) # upload the file
+                    f.close() # close the file
+
+                    # delete
+                    print("Deleting '" + file_name + "'... ")
+                    os.remove(file)
+
+                # after its all done, now stop
+                i = input("Hopper fully uploaded! Would you like to continue with the monitor program now? (y/n) > ")
+                if i.lower() == "n":
+                    exit()
+                else:
+                    print("Continuing with normal monitoring program!")
+
+
+# Program starts below!
+check_hopper()
 monitor()
