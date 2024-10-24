@@ -81,7 +81,7 @@ def check_hopper() -> None:
     if os.path.exists("./hopper"):
         files:list[str] = os.listdir("./hopper")
         if len(files) > 0:
-            i = input("There are " + len(files) + " in the hopper. Would you like to upload those now? (y/n) > ")
+            i = input("There are " + str(len(files)) + " in the hopper. Would you like to upload those now? (y/n) > ")
             if i.lower() == "y":
 
                 # upload and delete every one
