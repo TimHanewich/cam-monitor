@@ -89,7 +89,7 @@ def check_hopper() -> None:
             if i.lower() == "y":
 
                 # upload and delete every one
-                for i in range(len(file)):
+                for i in range(len(files)):
                     file:str = files[i]
 
                     # Calculate percent complete
