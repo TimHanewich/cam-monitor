@@ -99,7 +99,7 @@ def check_hopper() -> None:
                     # upload
                     f = open("./hopper/" + file, "rb")
                     data:bytes = f.read()
-                    print("(" + str(i) + " / " + str(len(file)) + ", " + percent_complete_str + ") " + "Uploading '" + file + "'... ", end="")
+                    print("(" + str(i) + " / " + str(len(files)) + ", " + percent_complete_str + ") " + "Uploading '" + file + "'... ", end="")
                     upload(data, file) # upload the file (and pass the file name to it so it uses that file name, not the current time)
                     f.close() # close the file
 
