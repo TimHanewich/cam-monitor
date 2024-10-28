@@ -41,7 +41,7 @@ def upload(data:bytes, blob_name:str = None) -> None:
     else:
         bc.upload_blob(data)
 
-def monitor() -> None:
+def monitor(upload_to_azure_blob:bool = True) -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
     
     imgnum:int = 1
@@ -52,19 +52,20 @@ def monitor() -> None:
         img:bytes = capture()
         print("\tImage of " + str(len(img)) + " bytes captured!")
 
-        # upload
-        upload_successful:bool = False
-        try:
-            print("\tUploading image... ")
-            upload(img)
-            print("\tUpload of image # " + str(imgnum) + " success!")
-            upload_successful = True
-        except Exception as e:
-            print("\tError while uploading! Msg: " + str(e))
-            upload_successful = False
+        # handle upload/save
+        uploaded:bool = False
+        if upload_to_azure_blob:
+            try:
+                print("\tUploading image... ")
+                upload(img)
+                print("\tUpload of image # " + str(imgnum) + " success!")
+                uploaded = True
+            except Exception as e:
+                print("\tError while uploading! Msg: " + str(e))
+                uploaded = False
 
-        # if upload was unsuccessful, save the photo to the hopper
-        if upload_successful == False:
+        # if upload was unsuccessful OR uploads to azure blob is turned off
+        if uploaded == False: # if it was not uploaded... either because uploading was turned off or it was turned on and it failed!
             print("\tSaving to hopper...")
             os.makedirs("./hopper", exist_ok=True) # create the hopper folder if if does not exist (exist_ok=True means it will be okay if it already exists)
             savepath = "./hopper/" + timestamp() + ".jpg" # create the full path
@@ -81,41 +82,76 @@ def monitor() -> None:
             print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
             time.sleep(1)
 
-def check_hopper() -> None:
-    if os.path.exists("./hopper"):
-        files:list[str] = os.listdir("./hopper")
-        if len(files) > 0:
-            i = input("There are " + str(len(files)) + " in the hopper. Would you like to upload those now? (y/n) > ")
-            if i.lower() == "y":
+def main() -> None:
 
-                # upload and delete every one
-                for i in range(len(files)):
-                    file:str = files[i]
+    # welcome
+    print("Welcome to cmonitor! I can:")
+    print()
+    print("1 - Begin recording a timelapse (active monitoring), uploading these pictures to Azure Blob Storage or saving to local storage.")
+    print()
+    print("2 - Upload locally saved images to Azure Blob Storage")
+    print()
+    i:str = input("What would you like to do? > ")
 
-                    # Calculate percent complete
-                    percent_complete:float = i / len(files)
-                    percent_complete_str:str = str(round(percent_complete * 100, 1)) + "%"
+    # handle choice
+    if i == "1":
+        
+        # input
+        print()
+        print("Sure, I can start timelapse recording!")
+        print("How would you like to handle saving of new images?")
+        print()
+        print("1 - Save them to Azure Blob Storage when captured, and if this fails, save to the local hopper")
+        print("2 - Save images locally (to the hopper)")
+        print()
+        i = input("What would you like to do? > ")
 
-                    # upload
-                    f = open("./hopper/" + file, "rb")
-                    data:bytes = f.read()
-                    print("(" + str(i) + " / " + str(len(files)) + ", " + percent_complete_str + ") " + "Uploading '" + file + "'... ", end="")
-                    upload(data, file) # upload the file (and pass the file name to it so it uses that file name, not the current time)
-                    f.close() # close the file
+        # handle
+        if i == "1":
+            monitor(True)
+        elif i == "2":
+            monitor(False)
+        else:
+            print("'" + i + "' was not an option!")
 
-                    # delete
-                    print("Deleting... ", end="")
-                    os.remove("./hopper/" + file)
-                    print("Success!")
+    elif i == "2":
+        print()
+        print("Checking hopper for photos...")
+        if os.path.exists("./hopper"):
+            files:list[str] = os.listdir("./hopper")
+            if len(files) > 0: # if there are files to upload
+                i = input("There are " + str(len(files)) + " in the hopper. Ready to start uploading these now? (y/n) > ")
+                if i.lower() == "y":
 
-                # after its all done, now stop
-                i = input("Hopper fully uploaded! Would you like to continue with the monitor program now? (y/n) > ")
-                if i.lower() == "n":
-                    exit()
-                else:
-                    print("Continuing with normal monitoring program!")
+                    # upload and delete every one
+                    for i in range(len(files)):
+                        file:str = files[i]
+
+                        # Calculate percent complete
+                        percent_complete:float = i / len(files)
+                        percent_complete_str:str = str(round(percent_complete * 100, 1)) + "%"
+
+                        # upload
+                        f = open("./hopper/" + file, "rb")
+                        data:bytes = f.read()
+                        print("(" + str(i) + " / " + str(len(files)) + ", " + percent_complete_str + ") " + "Uploading '" + file + "'... ", end="")
+                        upload(data, file) # upload the file (and pass the file name to it so it uses that file name, not the current time)
+                        f.close() # close the file
+                        print("Uploaded! ", end="")
+
+                        # delete
+                        print("Deleting... ", end="")
+                        os.remove("./hopper/" + file)
+                        print("Success!")
+
+                    # after its all done, now stop
+                    print("Hopper fully uploaded!")
+
+            else: # if there were no files to upload
+                print("There were no files in the hopper to upload!")
+    else:
+        print("'" + i + "' was not an option! Quitting...")
 
 
 # Program starts below!
-check_hopper()
-monitor()
+main()
