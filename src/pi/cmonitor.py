@@ -2,11 +2,13 @@ import subprocess
 import os
 import datetime
 import time
+import requests
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 
 ########### SETTINGS ###############
 capture_delay:int = 60 # number of seconds in between captures and uploads
 capture_command:str = "fswebcam -d /dev/video1 -r 1280x720 img.jpg" # must name the image "img.jpg" for it to be recognized!
+ping_url:str = "https://prod-17.usgovtexas.logic.azure.us:443/workflows/bd6053d466604033a7bb7a2b802d040d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aBXr1J5aZn-R78z01rLsBlMG_ow8-wutoyX9s4UuDHM" # if set to a URL (a string), program will periodically make an HTTP POST call to this URL with a status update. If set to Null or blank (""), no status update ping attempt will be made.
 ####################################
 
 def capture() -> bytes:
@@ -40,6 +42,13 @@ def upload(data:bytes, blob_name:str = None) -> None:
         print("Not uploading data of length " + str(len(data)) + "! Blob already exists!")
     else:
         bc.upload_blob(data)
+
+def status_ping(uptime_seconds:int, imgs_captured:int) -> None:
+    if ping_url == None or ping_url == "":
+        raise Exception("Unable to ping! Ping URL was null or empty!")
+    payload = {"uptime": uptime_seconds, "captured": imgs_captured}
+    headers = {"Content-Type": "application/json"}
+    response = requests.post(ping_url, json=payload, headers=headers)
 
 def monitor(upload_to_azure_blob:bool = True) -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
