@@ -88,8 +88,11 @@ def monitor(upload_to_azure_blob:bool = True) -> None:
         if status_ping != None and status_ping != "":
             print("\tStatus pinging... ")
             uptime_seconds:int = int(time.time() - started_at)
-            status_ping(uptime_seconds, imgnum)
-    
+            try:
+                status_ping(uptime_seconds, imgnum)
+            except Exception as ex:
+                print("Ping failed! Msg: " + str(ex))
+
         # wait
         imgnum = imgnum + 1
         started_waiting_at:float = time.time()
