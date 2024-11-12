@@ -53,6 +53,7 @@ def status_ping(uptime_seconds:int, imgs_captured:int) -> None:
 def monitor(upload_to_azure_blob:bool = True) -> None:
     """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
     
+    started_at:float = time.time()
     imgnum:int = 1
     while True:
 
@@ -83,6 +84,12 @@ def monitor(upload_to_azure_blob:bool = True) -> None:
             si.close()
             print("\tSaved locally to '" + savepath + "'!")
 
+        # if they set a status ping URL, ping now
+        if status_ping != None and status_ping != "":
+            print("\tStatus pinging... ")
+            uptime_seconds:int = int(time.time() - started_at)
+            status_ping(uptime_seconds, imgnum)
+    
         # wait
         imgnum = imgnum + 1
         started_waiting_at:float = time.time()
