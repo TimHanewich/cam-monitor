@@ -6,18 +6,9 @@ import requests
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 
 ########### SETTINGS ###############
-capture_delay:int = 60 # number of seconds in between captures and uploads
-capture_command:str = "fswebcam -d /dev/video1 -r 1280x720 img.jpg" # must name the image "img.jpg" for it to be recognized!
+ping_delay:int = 60 # number of seconds that should elapse between every ping to the URL.
 ping_url:str = "https://prod-17.usgovtexas.logic.azure.us:443/workflows/bd6053d466604033a7bb7a2b802d040d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aBXr1J5aZn-R78z01rLsBlMG_ow8-wutoyX9s4UuDHM" # if set to a URL (a string), program will periodically make an HTTP POST call to this URL with a status update. If set to Null or blank (""), no status update ping attempt will be made.
 ####################################
-
-def capture() -> bytes:
-    """Makes a command line command to capture an image using fswebcam and returns the file content as bytes"""
-    subprocess.run(capture_command, shell=True, capture_output=True, text=True) # run the command
-    with open("./img.jpg", "rb") as file:
-        file_content = file.read() # save the file content into memory
-    os.remove("./img.jpg") # delete the file
-    return file_content
 
 def getazblobconstr() -> str:
     """Retrieves Azure Blob Storage connection string from local file."""
@@ -50,56 +41,6 @@ def status_ping(uptime_seconds:int, imgs_captured:int) -> None:
     headers = {"Content-Type": "application/json"}
     response = requests.post(ping_url, json=payload, headers=headers)
 
-def monitor(upload_to_azure_blob:bool = True) -> None:
-    """Infinite loop of capturing images periodically and uploading to Azure Blob Storage"""
-    
-    started_at:float = time.time()
-    imgnum:int = 1
-    while True:
-
-        # capture
-        print("Capturing image # " + str(imgnum) + "... ")
-        img:bytes = capture()
-        print("\tImage of " + str(len(img)) + " bytes captured!")
-
-        # handle upload/save
-        uploaded:bool = False
-        if upload_to_azure_blob:
-            try:
-                print("\tUploading image... ")
-                upload(img)
-                print("\tUpload of image # " + str(imgnum) + " success!")
-                uploaded = True
-            except Exception as e:
-                print("\tError while uploading! Msg: " + str(e))
-                uploaded = False
-
-        # if upload was unsuccessful OR uploads to azure blob is turned off
-        if uploaded == False: # if it was not uploaded... either because uploading was turned off or it was turned on and it failed!
-            print("\tSaving to hopper...")
-            os.makedirs("./hopper", exist_ok=True) # create the hopper folder if if does not exist (exist_ok=True means it will be okay if it already exists)
-            savepath = "./hopper/" + timestamp() + ".jpg" # create the full path
-            si = open(savepath, "wb") # create the file in the hopper folder
-            si.write(img)
-            si.close()
-            print("\tSaved locally to '" + savepath + "'!")
-
-        # if they set a status ping URL, ping now
-        if status_ping != None and status_ping != "":
-            print("\tStatus pinging... ")
-            uptime_seconds:int = int(time.time() - started_at)
-            try:
-                status_ping(uptime_seconds, imgnum)
-            except Exception as ex:
-                print("Ping failed! Msg: " + str(ex))
-
-        # wait
-        imgnum = imgnum + 1
-        started_waiting_at:float = time.time()
-        while (time.time() - started_waiting_at) < capture_delay:
-            to_wait:int = capture_delay - int(time.time() - started_waiting_at)
-            print("Waiting " + str(to_wait) + " seconds until capture # " + str(imgnum) + "... ")
-            time.sleep(1)
 
 def main() -> None:
 
@@ -114,24 +55,7 @@ def main() -> None:
 
     # handle choice
     if i == "1":
-        
-        # input
-        print()
-        print("Sure, I can start timelapse recording!")
-        print("How would you like to handle saving of new images?")
-        print()
-        print("1 - Save them to Azure Blob Storage when captured, and if this fails, save to the local hopper")
-        print("2 - Save images locally (to the hopper)")
-        print()
-        i = input("What would you like to do? > ")
-
-        # handle
-        if i == "1":
-            monitor(True)
-        elif i == "2":
-            monitor(False)
-        else:
-            print("'" + i + "' was not an option!")
+        pass
 
     elif i == "2":
         print()
