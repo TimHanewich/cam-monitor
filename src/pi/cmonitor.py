@@ -4,6 +4,8 @@ import datetime
 import time
 import requests
 from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
+import subprocess
+import atexit
 
 ########### SETTINGS ###############
 ping_delay:int = 60 # number of seconds that should elapse between every ping to the URL.
@@ -47,7 +49,7 @@ def main() -> None:
     # welcome
     print("Welcome to cmonitor! I can:")
     print()
-    print("1 - Begin recording a timelapse (active monitoring), uploading these pictures to Azure Blob Storage or saving to local storage.")
+    print("1 - Begin recording a timelapse (active monitoring), saving each new image to local storage.")
     print()
     print("2 - Upload locally saved images to Azure Blob Storage")
     print()
@@ -55,8 +57,40 @@ def main() -> None:
 
     # handle choice
     if i == "1":
-        pass
+        print("Starting boot process...")
 
+        # ensure hopper folder exists
+        if os.path.exists("./hopper/") == False:
+            os.makedirs("./hopper/")
+
+        # if a "./temp.jpg" file exists right NOW (before starting stream), delete it
+        if os.path.exists("./temp.jpg"):
+            os.remove("./temp.jpg")
+
+        # start ffmpeg streaming, saving files to "temp.jpg" in current directory
+        print("Starting FFMPEG stream process...")
+        FFMPEG_STREAM_PROCESS:subprocess.Popen = subprocess.Popen(['ffmpeg', '-video_size', '1280x720', '-i', '/dev/video1', '-vf', 'fps=0.01667', '-update', '1', "./temp.jpg"], stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+
+        # continuously monitor
+        while True:
+
+            # ensure process is still running
+            if FFMPEG_STREAM_PROCESS.poll() == None:
+                print("FFMPEG stream confirmed to still be running.")
+            else:
+                print("FFMPEG stream stopped! It must have failed. Ensure FFMPEG is installed and the command used is correct.")
+                exit(0)
+
+            # check if file exists
+            if os.path.exists("./temp.jpg"):
+                print("Image captured and detected! Processing... ")
+                new_file_name:str = timestamp() + ".jpg"
+                os.rename("./temp.jpg", "./hopper/" + new_file_name) # rename and move to hopper
+                print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
+            else:
+                print("No capture image detected yet.")
+                time.sleep(1.0)
+            
     elif i == "2":
         print()
         print("Checking hopper for photos...")
@@ -95,6 +129,13 @@ def main() -> None:
     else:
         print("'" + i + "' was not an option! Quitting...")
 
+# Variables that must be declared at the top level, so that way they can be accessed by all functions
+FFMPEG_STREAM_PROCESS:subprocess.Popen = None
+
+def cleanup() -> None:
+    """Cleans up before program is complete, killing background processes."""
+    FFMPEG_STREAM_PROCESS.kill()
+atexit.register(cleanup)
 
 # Program starts below!
 main()
