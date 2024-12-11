@@ -91,7 +91,7 @@ def main() -> None:
                 print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
             else:
                 if image_last_captured_at == None:
-                    print("No captured image detected yet!")
+                    print("@ " + str(int(time.time())) + ": No captured image detected yet!")
                 else:
                     time_elapsed:float = time.time() - image_last_captured_at
                     print("No image detected since the last one, " + str(int(time_elapsed)) + " seconds ago.")
