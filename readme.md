@@ -19,3 +19,6 @@ The above command is described as:
 
 ## 3D-Printed Frame
 I designed and printed [this frame](https://www.thingiverse.com/thing:6806473) that holds my Logitech C270 webcam against the window for a timelapse.
+
+## Notable Commits
+- `d975340594f16072ccf5e394e707d44f4d240ad8` - last commit before moving to ffmpeg streaming technique.
