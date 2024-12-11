@@ -134,7 +134,8 @@ FFMPEG_STREAM_PROCESS:subprocess.Popen = None
 
 def cleanup() -> None:
     """Cleans up before program is complete, killing background processes."""
-    FFMPEG_STREAM_PROCESS.kill()
+    if FFMPEG_STREAM_PROCESS != None:
+        FFMPEG_STREAM_PROCESS.kill()
 atexit.register(cleanup)
 
 # Program starts below!
