@@ -69,7 +69,8 @@ def main() -> None:
 
         # start ffmpeg streaming, saving files to "temp.jpg" in current directory
         print("Starting FFMPEG stream process...")
-        FFMPEG_STREAM_PROCESS:subprocess.Popen = subprocess.Popen(['ffmpeg', '-video_size', '1280x720', '-i', '/dev/video1', '-vf', 'fps=0.01667', '-update', '1', "./temp.jpg"], stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+        cmd:list[str] = ['ffmpeg', '-video_size', '1280x720', '-i', '/dev/video1', '-vf', 'fps=0.01667', '-update', '1', "./temp.jpg"]
+        FFMPEG_STREAM_PROCESS:subprocess.Popen = subprocess.Popen(cmd, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
         # continuously monitor
         image_last_captured_at:float = None
