@@ -69,7 +69,7 @@ def main() -> None:
 
         # start ffmpeg streaming, saving files to "temp.jpg" in current directory
         print("Starting FFMPEG stream process...")
-        cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='%{localtime}': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg";
+        cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg";
         FFMPEG_STREAM_PROCESS:subprocess.Popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
         # continuously monitor
