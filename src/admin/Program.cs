@@ -87,7 +87,31 @@ namespace CMonitorAdministration
                 }
                 else if (WantToDo == "Download images by prefix")
                 {
+                    //Authenticate w/ azure blob storage
+                    AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
+                    BlobServiceClient bsc = new BlobServiceClient(GetAzureBlobStorageConnectionString());
+                    BlobContainerClient bcc = bsc.GetBlobContainerClient("cmonitor-images");
+                    if (await bcc.ExistsAsync() == false)
+                    {
+                        await bcc.CreateAsync();
+                    }
+                    AnsiConsole.MarkupLine("[green]set up![/]");
 
+                    //Ask for the prefix.
+                    string prefix = AnsiConsole.Ask<string>("What is the prefix?");
+
+                    //Get list of all photos
+                    List<string> PhotosToDownload = new List<string>();
+                    AnsiConsole.Markup("Querying photos that start with [bold][navy]" + prefix + "[/][/]... ");
+                    Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix);
+                    AnsiConsole.MarkupLine("[bold]" + items.Count().ToString("#,##0") + "[/] photos found");
+                    foreach (BlobItem bi in items)
+                    {
+                        PhotosToDownload.Add(bi.Name);
+                    }
+
+                    //Download
+                    await DownloadPhotos(bcc, PhotosToDownload.ToArray());
                 }
                 else if (WantToDo == "Check most recent image upload")
                 {
