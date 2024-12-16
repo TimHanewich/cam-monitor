@@ -83,7 +83,7 @@ namespace CMonitorAdministration
                     }
 
                     //Download
-                    await DownloadPhotos(bcc, PhotosToDownload.ToArray());
+                    await DownloadPhotosAsync(bcc, PhotosToDownload.ToArray());
                 }
                 else if (WantToDo == "Download images by prefix")
                 {
@@ -111,7 +111,7 @@ namespace CMonitorAdministration
                     }
 
                     //Download
-                    await DownloadPhotos(bcc, PhotosToDownload.ToArray());
+                    await DownloadPhotosAsync(bcc, PhotosToDownload.ToArray());
                 }
                 else if (WantToDo == "Check most recent image upload")
                 {
@@ -197,7 +197,7 @@ namespace CMonitorAdministration
         }
 
         //DOWNLOAD
-        public static async Task DownloadPhotos(BlobContainerClient bcc, string[] names)
+        public static async Task DownloadPhotosAsync(BlobContainerClient bcc, string[] names)
         {
             //Ready!
             Console.WriteLine();
