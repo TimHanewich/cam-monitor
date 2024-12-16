@@ -23,6 +23,7 @@ namespace CMonitorAdministration
                 AnsiConsole.MarkupLine("[bold][underline]Welcome to CMonitor Admin Application![/][/]");
                 ToDo.Title("What do you want to do?");
                 ToDo.AddChoice("Download images between a date range");
+                ToDo.AddChoice("Download images by prefix");
                 ToDo.AddChoice("Check most recent image upload");
                 ToDo.AddChoice("Exit");
 
@@ -81,106 +82,12 @@ namespace CMonitorAdministration
                         }
                     }
 
-                    //Ready!
-                    Console.WriteLine();
-                    AnsiConsole.Markup("[italic][gray]Ready to download [navy]" + PhotosToDownload.Count.ToString("#,##0") + " photos[/] when you are. Enter to proceed.[/][/]");
-                    Console.ReadLine();
+                    //Download
+                    await DownloadPhotos(bcc, PhotosToDownload.ToArray());
+                }
+                else if (WantToDo == "Download images by prefix")
+                {
 
-                    //Make a folder for us to download in
-                    string DownloadPath = Path.Combine("download-" + Guid.NewGuid().ToString().Replace("-", ""));
-                    System.IO.Directory.CreateDirectory(DownloadPath);
-
-                    //Download all
-                    Console.WriteLine();
-                    AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + PhotosToDownload.Count.ToString("#,##0") + "[/][/] over [bold][navy]" + AllDatesToGet.Length.ToString("#,##0") + "[/][/] dates!");
-                    int BytesDownloaded = 0;
-                    for (int t = 0; t < PhotosToDownload.Count; t++)
-                    {    
-
-                        //Print what we're doing
-                        string blobname = PhotosToDownload[t];
-                        float percent = Convert.ToSingle(t) / Convert.ToSingle(PhotosToDownload.Count);
-                        AnsiConsole.Markup("[gray](" + t.ToString("#,##0") + " / " + PhotosToDownload.Count.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/]" + " Downloading [bold][navy]" + blobname + "[/][/]... ");
-                        
-                        //Download into memory stream
-                        BlobClient bc = bcc.GetBlobClient(blobname);
-                        MemoryStream ms = new MemoryStream();
-                        await bc.DownloadToAsync(ms);
-                        BytesDownloaded = BytesDownloaded + Convert.ToInt32(ms.Length);
-
-                        //Write into file
-                        string destpath = Path.Combine(DownloadPath, blobname);
-                        FileStream fs = System.IO.File.Create(destpath); //Create the file
-                        fs.Position = 0;
-                        ms.Position = 0;
-                        ms.CopyTo(fs);
-                        fs.Close();
-                        ms.Close();
-                        await bc.DownloadToAsync(destpath);
-                        AnsiConsole.MarkupLine("[green]Downloaded![/]");
-                    }
-
-                    //Print
-                    float mb_downloaded = Convert.ToSingle(BytesDownloaded) / Convert.ToSingle(1048576);
-                    Console.WriteLine();
-                    AnsiConsole.MarkupLine("[green]" + PhotosToDownload.Count.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
-                    AnsiConsole.MarkupLine("[green]" + mb_downloaded.ToString("#,##0.0") + " MB downloaded![/]");
-                    Console.WriteLine();
-
-                    //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
-                    SelectionPrompt<string> RenameOption = new SelectionPrompt<string>();
-                    RenameOption.Title("Do you also want to rename them in order of oldest to newest (i.e. '0000001', '0000002', '0000003', etc.)");
-                    RenameOption.AddChoice("Yes");
-                    RenameOption.AddChoice("No");
-                    string RenameOptionSelection = AnsiConsole.Prompt(RenameOption);
-                    if (RenameOptionSelection == "Yes")
-                    {
-                        //Get all files
-                        string[] allfiles = System.IO.Directory.GetFiles(DownloadPath);
-
-                        //Construct dict of datetimes
-                        Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
-                        foreach (string file in allfiles)
-                        {
-                            string name = System.IO.Path.GetFileNameWithoutExtension(file);
-                            DateTime ts = TimeStamper.TimeStampToDateTime(name);
-                            FileDateTimes[file] = ts;
-                        }
-
-                        //Arrange in order from oldest to newest
-                        List<string> FilesToRename = new List<string>(); // In order from oldest to newest
-                        while (FileDateTimes.Count > 0)
-                        {
-                            KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
-                            foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
-                            {
-                                if (kvp.Value < winner.Value)
-                                {
-                                    winner = kvp;
-                                }
-                            }
-                            FilesToRename.Add(winner.Key); //Add it
-                            FileDateTimes.Remove(winner.Key); //Remove
-                        }
-
-                        //Rename each!
-                        int ticker = 0;
-                        foreach (string file in FilesToRename)
-                        {
-                            string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
-                            if (dir != null)
-                            {
-                                string path_old = file;
-                                string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
-                                AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
-                                System.IO.File.Move(path_old, path_new); //rename
-                                AnsiConsole.MarkupLine("Success!");
-                                ticker = ticker + 1;
-                            }
-                        }
-
-                        Console.WriteLine();
-                    }      
                 }
                 else if (WantToDo == "Check most recent image upload")
                 {
@@ -262,6 +169,111 @@ namespace CMonitorAdministration
                 AnsiConsole.Markup("[gray][italic]Enter to continue...[/][/]");
                 Console.ReadLine();
                 Console.Clear();
+            }
+        }
+
+        //DOWNLOAD
+        public static async Task DownloadPhotos(BlobContainerClient bcc, string[] names)
+        {
+            //Ready!
+            Console.WriteLine();
+            AnsiConsole.Markup("[italic][gray]Ready to download [navy]" + names.Length.ToString("#,##0") + " photos[/] when you are. Enter to proceed.[/][/]");
+            Console.ReadLine();
+
+            //Make a folder for us to download in
+            string DownloadPath = Path.Combine("download-" + Guid.NewGuid().ToString().Replace("-", ""));
+            System.IO.Directory.CreateDirectory(DownloadPath);
+
+            //Download all
+            Console.WriteLine();
+            AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + names.Length.ToString("#,##0") + "[/][/] photos!");
+            int BytesDownloaded = 0;
+            for (int t = 0; t < names.Length; t++)
+            {    
+
+                //Print what we're doing
+                string blobname = names[t];
+                float percent = Convert.ToSingle(t) / Convert.ToSingle(names.Length);
+                AnsiConsole.Markup("[gray](" + t.ToString("#,##0") + " / " + names.Length.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/]" + " Downloading [bold][navy]" + blobname + "[/][/]... ");
+                
+                //Download into memory stream
+                BlobClient bc = bcc.GetBlobClient(blobname);
+                MemoryStream ms = new MemoryStream();
+                await bc.DownloadToAsync(ms);
+                BytesDownloaded = BytesDownloaded + Convert.ToInt32(ms.Length);
+
+                //Write into file
+                string destpath = Path.Combine(DownloadPath, blobname);
+                FileStream fs = System.IO.File.Create(destpath); //Create the file
+                fs.Position = 0;
+                ms.Position = 0;
+                ms.CopyTo(fs);
+                fs.Close();
+                ms.Close();
+                await bc.DownloadToAsync(destpath);
+                AnsiConsole.MarkupLine("[green]Downloaded![/]");
+            }
+
+            //Print
+            float mb_downloaded = Convert.ToSingle(BytesDownloaded) / Convert.ToSingle(1048576);
+            Console.WriteLine();
+            AnsiConsole.MarkupLine("[green]" + names.Length.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
+            AnsiConsole.MarkupLine("[green]" + mb_downloaded.ToString("#,##0.0") + " MB downloaded![/]");
+            Console.WriteLine();
+
+            //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
+            SelectionPrompt<string> RenameOption = new SelectionPrompt<string>();
+            RenameOption.Title("Do you also want to rename them in order of oldest to newest (i.e. '0000001', '0000002', '0000003', etc.)");
+            RenameOption.AddChoice("Yes");
+            RenameOption.AddChoice("No");
+            string RenameOptionSelection = AnsiConsole.Prompt(RenameOption);
+            if (RenameOptionSelection == "Yes")
+            {
+                //Get all files
+                string[] allfiles = System.IO.Directory.GetFiles(DownloadPath);
+
+                //Construct dict of datetimes
+                Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
+                foreach (string file in allfiles)
+                {
+                    string name = System.IO.Path.GetFileNameWithoutExtension(file);
+                    DateTime ts = TimeStamper.TimeStampToDateTime(name);
+                    FileDateTimes[file] = ts;
+                }
+
+                //Arrange in order from oldest to newest
+                List<string> FilesToRename = new List<string>(); // In order from oldest to newest
+                while (FileDateTimes.Count > 0)
+                {
+                    KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
+                    foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
+                    {
+                        if (kvp.Value < winner.Value)
+                        {
+                            winner = kvp;
+                        }
+                    }
+                    FilesToRename.Add(winner.Key); //Add it
+                    FileDateTimes.Remove(winner.Key); //Remove
+                }
+
+                //Rename each!
+                int ticker = 0;
+                foreach (string file in FilesToRename)
+                {
+                    string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
+                    if (dir != null)
+                    {
+                        string path_old = file;
+                        string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
+                        AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
+                        System.IO.File.Move(path_old, path_new); //rename
+                        AnsiConsole.MarkupLine("Success!");
+                        ticker = ticker + 1;
+                    }
+                }
+
+                Console.WriteLine();
             }
         }
 
