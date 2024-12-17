@@ -23,6 +23,8 @@ def cleanup() -> None:
         FFMPEG_STREAM_PROCESS.terminate() # terminate "terminates" it, sending it SIGTERM. Much more gentle
         FFMPEG_STREAM_PROCESS.wait() # wait for it to finish (it is terminating)
         print("FFMPEG process terminated as part of atexit.")
+    else:
+        print("Not terminating FFMPEG process because it was set to None!")
 atexit.register(cleanup)
 
 def getazblobconstr() -> str:
