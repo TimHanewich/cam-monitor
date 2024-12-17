@@ -146,8 +146,10 @@ FFMPEG_STREAM_PROCESS:subprocess.Popen = None
 def cleanup() -> None:
     """Cleans up before program is complete, killing background processes."""
     if FFMPEG_STREAM_PROCESS != None:
-        FFMPEG_STREAM_PROCESS.kill()
-        print("FFMPEG process killed as part of atexit.")
+        # FFMPEG_STREAM_PROCESS.kill() # kill "KILLS" it, meaning SIGKILL
+        FFMPEG_STREAM_PROCESS.terminate() # terminate "terminates" it, sending it SIGTERM. Much more gentle
+        FFMPEG_STREAM_PROCESS.wait() # wait for it to finish (it is terminating)
+        print("FFMPEG process terminated as part of atexit.")
 atexit.register(cleanup)
 
 # Program starts below!
