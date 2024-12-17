@@ -147,6 +147,7 @@ def cleanup() -> None:
     """Cleans up before program is complete, killing background processes."""
     if FFMPEG_STREAM_PROCESS != None:
         FFMPEG_STREAM_PROCESS.kill()
+        print("FFMPEG process killed as part of atexit.")
 atexit.register(cleanup)
 
 # Program starts below!
