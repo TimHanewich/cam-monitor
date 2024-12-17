@@ -12,6 +12,18 @@ ping_delay:int = 60 # number of seconds that should elapse between every ping to
 ping_url:str = "https://prod-17.usgovtexas.logic.azure.us:443/workflows/bd6053d466604033a7bb7a2b802d040d/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=aBXr1J5aZn-R78z01rLsBlMG_ow8-wutoyX9s4UuDHM" # if set to a URL (a string), program will periodically make an HTTP POST call to this URL with a status update. If set to Null or blank (""), no status update ping attempt will be made.
 ####################################
 
+# Variables that must be declared at the top level, so that way they can be accessed by all functions
+FFMPEG_STREAM_PROCESS:subprocess.Popen = None
+
+def cleanup() -> None:
+    """Cleans up before program is complete, killing background processes."""
+    if FFMPEG_STREAM_PROCESS != None:
+        # FFMPEG_STREAM_PROCESS.kill() # kill "KILLS" it, meaning SIGKILL
+        FFMPEG_STREAM_PROCESS.terminate() # terminate "terminates" it, sending it SIGTERM. Much more gentle
+        FFMPEG_STREAM_PROCESS.wait() # wait for it to finish (it is terminating)
+        print("FFMPEG process terminated as part of atexit.")
+atexit.register(cleanup)
+
 def getazblobconstr() -> str:
     """Retrieves Azure Blob Storage connection string from local file."""
     f = open("../azblobconstr.txt", "rt")
@@ -72,7 +84,7 @@ def main() -> None:
         #cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf fps=0.01667 -update 1 ./temp.jpg"     # the original capture command I was using
         #cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg";    # I had tried using this command to "write" the UTC time on top, but I was getting this very bad anti-aliasing/pixelation, like in this image for example: https://i.imgur.com/EgJcf7b.jpeg. But here is a full resolution one without the text for comparison purposes: https://i.imgur.com/EHAHB6g.jpeg
         cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg"   # same as above, but without the font file fully specified. For some reason, despite defaulting to using font file "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", it still seems to work without pixelation. 
-        FFMPEG_STREAM_PROCESS:subprocess.Popen = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+        FFMPEG_STREAM_PROCESS = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
         # continuously monitor
         image_last_captured_at:float = None
@@ -139,18 +151,6 @@ def main() -> None:
                 print("There were no files in the hopper to upload!")
     else:
         print("'" + i + "' was not an option! Quitting...")
-
-# Variables that must be declared at the top level, so that way they can be accessed by all functions
-FFMPEG_STREAM_PROCESS:subprocess.Popen = None
-
-def cleanup() -> None:
-    """Cleans up before program is complete, killing background processes."""
-    if FFMPEG_STREAM_PROCESS != None:
-        # FFMPEG_STREAM_PROCESS.kill() # kill "KILLS" it, meaning SIGKILL
-        FFMPEG_STREAM_PROCESS.terminate() # terminate "terminates" it, sending it SIGTERM. Much more gentle
-        FFMPEG_STREAM_PROCESS.wait() # wait for it to finish (it is terminating)
-        print("FFMPEG process terminated as part of atexit.")
-atexit.register(cleanup)
 
 # Program starts below!
 main()
