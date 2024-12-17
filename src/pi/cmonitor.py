@@ -76,6 +76,7 @@ def main() -> None:
 
         # continuously monitor
         image_last_captured_at:float = None
+        imgs_captured:int = 0 # count of how many images were captured overall
         while True:
 
             # ensure process is still running
@@ -92,12 +93,13 @@ def main() -> None:
                 new_file_name:str = timestamp() + ".jpg"
                 os.rename("./temp.jpg", "./hopper/" + new_file_name) # rename and move to hopper
                 print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
+                imgs_captured = imgs_captured + 1
             else:
                 if image_last_captured_at == None:
                     print("@ " + str(int(time.time())) + ": No captured image detected yet!")
                 else:
                     time_elapsed:float = time.time() - image_last_captured_at
-                    print("No image detected since the last one, " + str(int(time_elapsed)) + " seconds ago.")
+                    print(str(imgs_captured) + " captured so far, last one " + str(int(time_elapsed)) + " seconds ago.")
                 time.sleep(1.0)
             
     elif i == "2":
