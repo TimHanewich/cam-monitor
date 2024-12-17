@@ -99,7 +99,7 @@ def main() -> None:
                     print("@ " + str(int(time.time())) + ": No captured image detected yet!")
                 else:
                     time_elapsed:float = time.time() - image_last_captured_at
-                    print(str(imgs_captured) + " captured so far, last one " + str(int(time_elapsed)) + " seconds ago.")
+                    print(str(imgs_captured) + " images captured so far, last one " + str(int(time_elapsed)) + " seconds ago.")
                 time.sleep(1.0)
             
     elif i == "2":
