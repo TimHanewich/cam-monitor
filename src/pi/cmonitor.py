@@ -7,6 +7,11 @@ from azure.storage.blob import BlobServiceClient, ContainerClient, BlobClient
 import subprocess
 import atexit
 
+##### SETTINGS #####
+ffmpeg_cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg"   # same as above, but without the font file fully specified. For some reason, despite defaulting to using font file "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", it still seems to work without pixelation. 
+
+####################
+
 # Variables that must be declared at the top level, so that way they can be accessed by all functions
 FFMPEG_STREAM_PROCESS:subprocess.Popen = None
 
@@ -95,11 +100,8 @@ def main() -> None:
 
         # start ffmpeg streaming, saving files to "temp.jpg" in current directory
         print("Starting FFMPEG stream process...")
-        #cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf fps=0.01667 -update 1 ./temp.jpg"     # the original capture command I was using
-        #cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=fontfile=/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf:text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg";    # I had tried using this command to "write" the UTC time on top, but I was getting this very bad anti-aliasing/pixelation, like in this image for example: https://i.imgur.com/EgJcf7b.jpeg. But here is a full resolution one without the text for comparison purposes: https://i.imgur.com/EHAHB6g.jpeg
-        cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video1 -vf \"fps=0.01667,drawtext=text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg"   # same as above, but without the font file fully specified. For some reason, despite defaulting to using font file "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", it still seems to work without pixelation. 
         global FFMPEG_STREAM_PROCESS
-        FFMPEG_STREAM_PROCESS = subprocess.Popen(cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
+        FFMPEG_STREAM_PROCESS = subprocess.Popen(ffmpeg_cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
         # continuously monitor
         image_last_captured_at:float = None
