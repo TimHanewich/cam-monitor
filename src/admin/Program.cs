@@ -118,12 +118,21 @@ namespace CMonitorAdministration
                     //Authenticate w/ azure blob storage
                     AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
                     BlobServiceClient bsc = new BlobServiceClient(GetAzureBlobStorageConnectionString());
-                    BlobContainerClient bcc = bsc.GetBlobContainerClient("cmonitor-images");
-                    if (await bcc.ExistsAsync() == false)
+                    AnsiConsole.MarkupLine("set up!");
+
+                    //List out containers to check
+                    Azure.Pageable<BlobContainerItem> containers = bsc.GetBlobContainers();
+                    SelectionPrompt<string> ContainerToSearchPrompt = new SelectionPrompt<string>();
+                    ContainerToSearchPrompt.Title("What container do you want to search?");
+                    foreach (BlobContainerItem bci in containers)
                     {
-                        await bcc.CreateAsync();
+                        ContainerToSearchPrompt.AddChoice(bci.Name);
                     }
-                    AnsiConsole.MarkupLine("[green]set up![/]");
+                    string ContainerToSearch = AnsiConsole.Prompt(ContainerToSearchPrompt);
+
+                    //Get the container
+                    BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
+                    AnsiConsole.MarkupLine("Great, I will search container [bold]" + ContainerToSearch + "[/] for the most recent image upload."); 
 
                     //Begin search
                     DateTime FurthestSearch = DateTime.UtcNow.AddDays(-7);
@@ -135,7 +144,8 @@ namespace CMonitorAdministration
                         {
                             DateTime ToSearchNow = ToSearch[ToSearch.Length - 1 - t]; //Inverse direction
                             AnsiConsole.Markup("Searching on date [bold]" + ToSearchNow.ToShortDateString() + "[/]... ");
-                            Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: ToSearchNow.Year.ToString("0000") + ToSearchNow.Month.ToString("00") + ToSearchNow.Day.ToString("00")); //Search on the date (using prefix)
+                            string prefix = ToSearchNow.Year.ToString("0000") + ToSearchNow.Month.ToString("00") + ToSearchNow.Day.ToString("00");
+                            Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix); //Search on the date (using prefix)
                             AnsiConsole.MarkupLine("[bold]" + items.Count().ToString("#,##0") + "[/] photos found");
                             
                             //If there are items, get the most recent one!
