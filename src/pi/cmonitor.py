@@ -59,7 +59,7 @@ def main() -> None:
     print()
     print("1 - Begin recording a timelapse (active monitoring)")
     print()
-    print("2 - Upload locally saved images to Azure Blob Storage")
+    print("2 - Upload locally saved images (in the hopper) to Azure Blob Storage")
     print()
     i:str = input("What would you like to do? > ")
 
