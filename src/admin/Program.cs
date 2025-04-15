@@ -281,50 +281,7 @@ namespace CMonitorAdministration
             string RenameOptionSelection = AnsiConsole.Prompt(RenameOption);
             if (RenameOptionSelection == "Yes")
             {
-                //Get all files
-                string[] allfiles = System.IO.Directory.GetFiles(DownloadPath);
-
-                //Construct dict of datetimes
-                Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
-                foreach (string file in allfiles)
-                {
-                    string name = System.IO.Path.GetFileNameWithoutExtension(file);
-                    DateTime ts = TimeStamper.TimeStampToDateTime(name);
-                    FileDateTimes[file] = ts;
-                }
-
-                //Arrange in order from oldest to newest
-                List<string> FilesToRename = new List<string>(); // In order from oldest to newest
-                while (FileDateTimes.Count > 0)
-                {
-                    KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
-                    foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
-                    {
-                        if (kvp.Value < winner.Value)
-                        {
-                            winner = kvp;
-                        }
-                    }
-                    FilesToRename.Add(winner.Key); //Add it
-                    FileDateTimes.Remove(winner.Key); //Remove
-                }
-
-                //Rename each!
-                int ticker = 0;
-                foreach (string file in FilesToRename)
-                {
-                    string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
-                    if (dir != null)
-                    {
-                        string path_old = file;
-                        string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
-                        AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
-                        System.IO.File.Move(path_old, path_new); //rename
-                        AnsiConsole.MarkupLine("Success!");
-                        ticker = ticker + 1;
-                    }
-                }
-
+                RenameSequential(DownloadPath);
                 Console.WriteLine();
             }
         }
@@ -366,6 +323,54 @@ namespace CMonitorAdministration
                 else
                 {
                     Console.WriteLine("Blob '" + name + "' already exists!");
+                }
+            }
+        }
+
+        //Rename all from a datetime stamp to number-based (i.e. 00000001.jpg, 00000002.jpg, etc.)
+        public static void RenameSequential(string folder_path)
+        {
+            //Get all files
+            string[] allfiles = System.IO.Directory.GetFiles(folder_path);
+
+            //Construct dict of datetimes
+            Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
+            foreach (string file in allfiles)
+            {
+                string name = System.IO.Path.GetFileNameWithoutExtension(file);
+                DateTime ts = TimeStamper.TimeStampToDateTime(name);
+                FileDateTimes[file] = ts;
+            }
+
+            //Arrange in order from oldest to newest
+            List<string> FilesToRename = new List<string>(); // In order from oldest to newest
+            while (FileDateTimes.Count > 0)
+            {
+                KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
+                foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
+                {
+                    if (kvp.Value < winner.Value)
+                    {
+                        winner = kvp;
+                    }
+                }
+                FilesToRename.Add(winner.Key); //Add it
+                FileDateTimes.Remove(winner.Key); //Remove
+            }
+
+            //Rename each!
+            int ticker = 0;
+            foreach (string file in FilesToRename)
+            {
+                string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
+                if (dir != null)
+                {
+                    string path_old = file;
+                    string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
+                    AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
+                    System.IO.File.Move(path_old, path_new); //rename
+                    AnsiConsole.MarkupLine("Success!");
+                    ticker = ticker + 1;
                 }
             }
         }
