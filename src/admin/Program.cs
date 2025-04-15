@@ -331,9 +331,12 @@ namespace CMonitorAdministration
         public static void RenameSequential(string folder_path)
         {
             //Get all files
+            AnsiConsole.Markup("[italic]Reading files... [/]");
             string[] allfiles = System.IO.Directory.GetFiles(folder_path);
+            AnsiConsole.MarkupLine("[italic]" + allfiles.Length.ToString("#,##0") +  " files listed.[/]");
 
             //Construct dict of datetimes
+            AnsiConsole.Markup("[italic]Parsing timestamps from files... [/]");
             Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
             foreach (string file in allfiles)
             {
@@ -341,8 +344,10 @@ namespace CMonitorAdministration
                 DateTime ts = TimeStamper.TimeStampToDateTime(name);
                 FileDateTimes[file] = ts;
             }
+            AnsiConsole.MarkupLine("[italic]done![/]");
 
             //Arrange in order from oldest to newest
+            AnsiConsole.Markup("[italic]Arranging in order... [/]");
             List<string> FilesToRename = new List<string>(); // In order from oldest to newest
             while (FileDateTimes.Count > 0)
             {
@@ -357,6 +362,7 @@ namespace CMonitorAdministration
                 FilesToRename.Add(winner.Key); //Add it
                 FileDateTimes.Remove(winner.Key); //Remove
             }
+            AnsiConsole.MarkupLine("[italic]done![/]");
 
             //Rename each!
             int ticker = 0;
@@ -365,9 +371,10 @@ namespace CMonitorAdministration
                 string? dir = System.IO.Path.GetDirectoryName(file); //Get the parent directory path
                 if (dir != null)
                 {
+                    float percent_complete = Convert.ToSingle(ticker) / Convert.ToSingle(FilesToRename.Count);
                     string path_old = file;
                     string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
-                    AnsiConsole.Markup("Renaming '" + path_old + "' to '" + path_new + "'... ");
+                    AnsiConsole.Markup("[gray](" + percent_complete.ToString("#0.0%") + ")[/] Renaming '" + path_old + "' to '" + path_new + "'... ");
                     System.IO.File.Move(path_old, path_new); //rename
                     AnsiConsole.MarkupLine("Success!");
                     ticker = ticker + 1;
