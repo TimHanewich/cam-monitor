@@ -20,5 +20,8 @@ The above command is described as:
 ## 3D-Printed Frame
 I designed and printed [this frame](https://www.thingiverse.com/thing:6806473) that holds my Logitech C270 webcam against the window for a timelapse.
 
+## Azure Blob Storage Cost Calculator
+I made [this spreadsheet](https://github.com/TimHanewich/cam-monitor/releases/download/1/azure-calculator.xlsx) to estimate the cost of uploading, storing, and accessing these images in Azure Blob Storage.
+
 ## Notable Commits
 - `d975340594f16072ccf5e394e707d44f4d240ad8` - last commit before moving to ffmpeg streaming technique.
