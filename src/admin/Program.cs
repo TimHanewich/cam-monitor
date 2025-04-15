@@ -11,7 +11,8 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            MainProgramAsync().Wait();
+            RenameSequential(@"C:\Users\timh\Downloads\cam-monitor-all\cmonitor-images");
+            //MainProgramAsync().Wait();
         }
 
         public async static Task MainProgramAsync()
@@ -334,6 +335,32 @@ namespace CMonitorAdministration
             AnsiConsole.Markup("[italic]Reading files... [/]");
             string[] allfiles = System.IO.Directory.GetFiles(folder_path);
             AnsiConsole.MarkupLine("[italic]" + allfiles.Length.ToString("#,##0") +  " files listed.[/]");
+
+            //Ensure each one is a valid datetime stamp (is an integer only)
+            List<string> InvalidFiles = new List<string>();
+            foreach (string file in allfiles)
+            {
+                try
+                {
+                    Convert.ToInt32(Path.GetFileNameWithoutExtension(file));
+                }
+                catch
+                {
+                    InvalidFiles.Add(file);
+                }
+            }
+
+            //If there are some invalid files, show them
+            if (InvalidFiles.Count > 0)
+            {
+                AnsiConsole.MarkupLine("[red]There are some invalid files in the directory that are not named as a true datetime stamp (a pure integer)! They are listed below:[/]");
+                foreach (string invalidfile in InvalidFiles)
+                {
+                    AnsiConsole.MarkupLine("[red]" + invalidfile + "[/]");
+                }
+                AnsiConsole.MarkupLine("[red]Please remove these before proceeding again.[/]");
+                return;
+            }
 
             //Construct dict of datetimes
             AnsiConsole.Markup("[italic]Parsing timestamps from files... [/]");
