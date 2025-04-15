@@ -6,6 +6,14 @@ This project has two projects within:
     - Only dependency: [azure.storage.blob](https://pypi.org/project/azure-storage-blob/).
 - **[admin](./admin/)** - .NET console app for downloading photos stored in Azure Blob Storage.
 
+## How to use this
+I have provided all the resources here to facilitate the capturing, uploading, accessing, and stitching of images into a timelapse.
+
+- On a SBC like a Raspberry Pi (I am using an Orange Pi 3 LTS), plug in a simple USB webcam.
+- Run [cmonitor.py](./src/pi/cmonitor.py) and go through the prompts to begin recording a timelapse. This will continuously capture photos and then upload them to your Azure Blob Storage account. *But before doing so, add your Azure Blob Storage connection string, ensure the FFMPEG command it is using it capture works, etc.*
+- After a while of it capturing photos, run [the admin .NET console app](./src/admin/) to download images for a certain date range. This will download the images and then rename them so they follow a standard sequence (i.e. `000001.jpg`, `000002.jpg`, etc.)
+- Use [FFMPEG](https://www.ffmpeg.org/) as described below to then generate a timelapse .MP4 of those images.
+
 ## Stitching Timelapse Together with FFMPEG
 Example command:
 ```
