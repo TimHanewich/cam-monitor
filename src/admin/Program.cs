@@ -34,12 +34,21 @@ namespace CMonitorAdministration
                     //Authenticate w/ azure blob storage
                     AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
                     BlobServiceClient bsc = new BlobServiceClient(GetAzureBlobStorageConnectionString());
-                    BlobContainerClient bcc = bsc.GetBlobContainerClient("cmonitor-images");
-                    if (await bcc.ExistsAsync() == false)
+                    AnsiConsole.MarkupLine("set up!");
+
+                    //List out containers to check
+                    Azure.Pageable<BlobContainerItem> containers = bsc.GetBlobContainers();
+                    SelectionPrompt<string> ContainerToSearchPrompt = new SelectionPrompt<string>();
+                    ContainerToSearchPrompt.Title("What container do you want to search?");
+                    foreach (BlobContainerItem bci in containers)
                     {
-                        await bcc.CreateAsync();
+                        ContainerToSearchPrompt.AddChoice(bci.Name);
                     }
-                    AnsiConsole.MarkupLine("[green]set up![/]");
+                    string ContainerToSearch = AnsiConsole.Prompt(ContainerToSearchPrompt);
+
+                    //Get the container
+                    BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
+                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/]."); 
 
                     //Get begin date?
                     DateTime starting = DateTime.UtcNow.AddDays(-7); //default to 1 week
@@ -90,12 +99,21 @@ namespace CMonitorAdministration
                     //Authenticate w/ azure blob storage
                     AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
                     BlobServiceClient bsc = new BlobServiceClient(GetAzureBlobStorageConnectionString());
-                    BlobContainerClient bcc = bsc.GetBlobContainerClient("cmonitor-images");
-                    if (await bcc.ExistsAsync() == false)
+                    AnsiConsole.MarkupLine("set up!");
+
+                    //List out containers to check
+                    Azure.Pageable<BlobContainerItem> containers = bsc.GetBlobContainers();
+                    SelectionPrompt<string> ContainerToSearchPrompt = new SelectionPrompt<string>();
+                    ContainerToSearchPrompt.Title("What container do you want to search?");
+                    foreach (BlobContainerItem bci in containers)
                     {
-                        await bcc.CreateAsync();
+                        ContainerToSearchPrompt.AddChoice(bci.Name);
                     }
-                    AnsiConsole.MarkupLine("[green]set up![/]");
+                    string ContainerToSearch = AnsiConsole.Prompt(ContainerToSearchPrompt);
+
+                    //Get the container
+                    BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
+                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/]."); 
 
                     //Ask for the prefix.
                     string prefix = AnsiConsole.Ask<string>("What is the prefix?");
