@@ -11,8 +11,7 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            RenameSequential(@"C:\Users\timh\Downloads\cam-monitor-all\cmonitor-images");
-            //MainProgramAsync().Wait();
+            MainProgramAsync().Wait();
         }
 
         public async static Task MainProgramAsync()
@@ -342,7 +341,7 @@ namespace CMonitorAdministration
             {
                 try
                 {
-                    Convert.ToInt32(Path.GetFileNameWithoutExtension(file));
+                    TimeStamper.TimeStampToDateTime(Path.GetFileNameWithoutExtension(file));
                 }
                 catch
                 {
