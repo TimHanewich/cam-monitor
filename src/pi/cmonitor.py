@@ -122,7 +122,7 @@ def main() -> None:
                 
                 # move it to hopper, also renaming it to the current datetime stamp
                 new_file_name:str = timestamp() + ".jpg"
-                new_file_path:str = "./hopper/" + new_file_path
+                new_file_path:str = "./hopper/" + new_file_name
                 os.rename("./temp.jpg", new_file_path) # rename and move to hopper
                 print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
 
