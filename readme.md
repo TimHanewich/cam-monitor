@@ -26,7 +26,9 @@ The above command is described as:
 - `output.mp4` (name at the end) defines the name.
 
 ## 3D-Printed Frame
-I designed and printed [this frame](https://www.thingiverse.com/thing:6806473) that holds my Logitech C270 webcam against the window for a timelapse.
+I designed two frames that allow for a Logitech C270 webcam to be mounted to a window, facing outward.
+- [This frame design](https://www.thingiverse.com/thing:6859186) requires you to remove the webcam from its plastic housing, but is very secure. This is recommended.
+- [This frame design](https://www.thingiverse.com/thing:6806473) allows for the webcam to be mounted in its original housing. I don't recommend using this as it is not that secure, but this can be used if you really do not want to remove  the webcam from its origial housing.
 
 ## Azure Blob Storage Cost Calculator
 I made [this spreadsheet](https://github.com/TimHanewich/cam-monitor/releases/download/1/azure-calculator.xlsx) to estimate the cost of uploading, storing, and accessing these images in Azure Blob Storage.
