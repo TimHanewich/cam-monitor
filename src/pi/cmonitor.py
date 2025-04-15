@@ -52,7 +52,7 @@ def main() -> None:
     # welcome
     print("Welcome to cmonitor! I can:")
     print()
-    print("1 - Begin recording a timelapse (active monitoring), saving each new image to local storage.")
+    print("1 - Begin recording a timelapse (active monitoring)")
     print()
     print("2 - Upload locally saved images to Azure Blob Storage")
     print()
@@ -60,15 +60,38 @@ def main() -> None:
 
     # handle choice
     if i == "1":
+
+        # ask where to save the images
+        print("Great! I can start recording...")
+        print("But first, where do you want to save captured photos?")
+        print()
+        print("1 - Azure Blob Storage (provide your key in azblobstr.txt)")
+        print()
+        print("2 - Locally to the 'hopper' directory, where they can later be retrieved.")
+        print()
+        i = input("What do you want to do? > ")
+        UploadAzureBlob:bool = False
+        if i == "1":
+            UploadAzureBlob = True
+            print("Will save new images to Azure Blob Storage!")
+        elif i == "2":
+            print("Will save new images to local storage!")
+        else:
+            print("'" + i + "' was not an option! Quitting...")
+            exit()
+
         print("Starting boot process...")
+
+        # if a "./temp.jpg" file exists right NOW (before starting stream), delete it
+        # the ffmpeg command will save files as "temp.jpg" to the local direcory
+        # and then this program will catch it immediately and rename it to the current datetime stamp
+        if os.path.exists("./temp.jpg"):
+            os.remove("./temp.jpg")
 
         # ensure hopper folder exists
         if os.path.exists("./hopper/") == False:
             os.makedirs("./hopper/")
 
-        # if a "./temp.jpg" file exists right NOW (before starting stream), delete it
-        if os.path.exists("./temp.jpg"):
-            os.remove("./temp.jpg")
 
         # start ffmpeg streaming, saving files to "temp.jpg" in current directory
         print("Starting FFMPEG stream process...")
@@ -94,10 +117,32 @@ def main() -> None:
             if os.path.exists("./temp.jpg"):
                 image_last_captured_at = time.time()
                 print("Image captured and detected! Processing... ")
+                
+                # move it to hopper, also renaming it to the current datetime stamp
                 new_file_name:str = timestamp() + ".jpg"
-                os.rename("./temp.jpg", "./hopper/" + new_file_name) # rename and move to hopper
+                new_file_path:str = "./hopper/" + new_file_path
+                os.rename("./temp.jpg", new_file_path) # rename and move to hopper
                 print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
+
+                # try to upload to azure blob?
+                if UploadAzureBlob:
+                    try:
+                        
+                        # upload
+                        print("Uploading '" + new_file_name + "' now...")
+                        data:bytes = open(new_file_path, "rb")
+                        upload(data, new_file_name)
+                        print("Uploaded!")
+
+                        # if uploaded successfully, delete!
+                        print("Deleting file '" + new_file_name + "'...")
+                        os.remove(new_file_path)
+                        print("Deleted!")
+                    except:
+                        print("Upload to Azure Blob Storage failed! It will remain in the hopper for later.")
+
                 imgs_captured = imgs_captured + 1
+
             else:
                 if image_last_captured_at == None:
                     print("@ " + str(int(time.time())) + ": No captured image detected yet!")
