@@ -33,5 +33,10 @@ I designed two frames that allow for a Logitech C270 webcam to be mounted to a w
 ## Azure Blob Storage Cost Calculator
 I made [this spreadsheet](https://github.com/TimHanewich/cam-monitor/releases/download/1/azure-calculator.xlsx) to estimate the cost of uploading, storing, and accessing these images in Azure Blob Storage.
 
+## Keeping Network Connection Active by Disabling Power Management
+Run `sudo iwconfig wlan0 power off` to disable power management your SBC.
+
+You can also run `iwconfig` which will show you, for wlan0, if Power Management is turned on or off.
+
 ## Notable Commits
 - `d975340594f16072ccf5e394e707d44f4d240ad8` - last commit before moving to ffmpeg streaming technique.
