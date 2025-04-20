@@ -14,6 +14,22 @@ I have provided all the resources here to facilitate the capturing, uploading, a
 - After a while of it capturing photos, run [the admin .NET console app](./src/admin/) to download images for a certain date range. This will download the images and then rename them so they follow a standard sequence (i.e. `000001.jpg`, `000002.jpg`, etc.)
 - Use [FFMPEG](https://www.ffmpeg.org/) as described below to then generate a timelapse .MP4 of those images.
 
+## Step-by-Step for setting up new SBC
+- Install software
+    - `sudo apt update` and `sudo apt upgrade`
+    - *(optional)* Install tmux: `sudo apt install tmux`
+    - Install git: `sudo apt install git`
+    - Install Python and pip: `sudo apt install python3` and `sudo apt install python3-pip`
+    - Install ffmpeg: `sudo apt install ffmpeg` 
+    - Install Azure Blob Storage Python package with pip: `python3 -m pip install azure-storage-blob`
+    - Install Azure Identity with pip: `python3 -m pip install azure-identity`
+    - *Possibly needed, I needed to do this on a Raspberry Pi Zero W deployment... I think the azure-storage-blob package relies on it:* `sudo apt install libssl1.1`
+- Plug in the USB webcam.
+- Git clone this repo.
+- Add your Azure Blob Storage connection string to [azblobconstr.txt](./src/azblobconstr.txt).
+- Run [cmonitor.py](./src/pi/cmonitor.py)!
+    - Before you do, change any pertinent settings in cmonitor.py... i.e. container name, the fswebcam command.
+
 ## Stitching Timelapse Together with FFMPEG
 Example command:
 ```
