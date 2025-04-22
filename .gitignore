@@ -3,3 +3,4 @@ bin/
 obj/
 *.sln
 download-*/
+error.txt
