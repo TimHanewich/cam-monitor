@@ -197,4 +197,4 @@ def main() -> None:
         print("'" + i + "' was not an option! Quitting...")
 
 # Program starts below!
-main()
+#main()
