@@ -53,7 +53,9 @@ def upload(data:bytes, blob_name:str = None) -> None:
 
 def log_error(msg:str) -> None:
     f = open("./error.txt", "a")
-    f.write(str(datetime.datetime.now(datetime.UTC)) + " UTC: " + msg + "\n")
+    utc_time:datetime.datetime = datetime.datetime.now(datetime.timezone.utc)
+    utc_time_formatted:str = utc_time.strftime("%Y-%m-%d %H:%M")
+    f.write(utc_time_formatted + " UTC: " + msg + "\n")
     f.close()
 
 
