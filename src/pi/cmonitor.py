@@ -111,54 +111,60 @@ def main() -> None:
         FFMPEG_STREAM_PROCESS = subprocess.Popen(ffmpeg_cmd, shell=True, stdout=subprocess.DEVNULL, stderr = subprocess.DEVNULL)
 
         # continuously monitor
-        image_last_captured_at:float = None
-        imgs_captured:int = 0 # count of how many images were captured overall
-        while True:
+        try:
+            image_last_captured_at:float = None
+            imgs_captured:int = 0 # count of how many images were captured overall
+            while True:
 
-            # ensure process is still running
-            if FFMPEG_STREAM_PROCESS.poll() == None:
-                print("FFMPEG stream confirmed to still be running.")
-            else:
-                print("FFMPEG stream stopped! It must have failed. Ensure FFMPEG is installed and the command used is correct.")
-                exit(0)
-
-            # check if file exists
-            if os.path.exists("./temp.jpg"):
-                image_last_captured_at = time.time()
-                print("Image captured and detected! Processing... ")
-                
-                # move it to hopper, also renaming it to the current datetime stamp
-                new_file_name:str = timestamp() + ".jpg"
-                new_file_path:str = "./hopper/" + new_file_name
-                os.rename("./temp.jpg", new_file_path) # rename and move to hopper
-                print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
-
-                # try to upload to azure blob?
-                if UploadAzureBlob:
-                    try:
-                        
-                        # upload
-                        print("Uploading '" + new_file_name + "' now...")
-                        data:bytes = open(new_file_path, "rb")
-                        upload(data, new_file_name)
-                        print("Uploaded!")
-
-                        # if uploaded successfully, delete!
-                        print("Deleting file '" + new_file_name + "'...")
-                        os.remove(new_file_path)
-                        print("Deleted!")
-                    except:
-                        print("Upload to Azure Blob Storage failed! It will remain in the hopper for later.")
-
-                imgs_captured = imgs_captured + 1
-
-            else:
-                if image_last_captured_at == None:
-                    print("@ " + str(int(time.time())) + ": No captured image detected yet!")
+                # ensure process is still running
+                if FFMPEG_STREAM_PROCESS.poll() == None:
+                    print("FFMPEG stream confirmed to still be running.")
                 else:
-                    time_elapsed:float = time.time() - image_last_captured_at
-                    print(str(imgs_captured) + " images captured so far, last one " + str(int(time_elapsed)) + " seconds ago.")
-                time.sleep(1.0)
+                    print("FFMPEG stream stopped! It must have failed. Ensure FFMPEG is installed and the command used is correct.")
+                    exit(0)
+
+                # check if file exists
+                if os.path.exists("./temp.jpg"):
+                    image_last_captured_at = time.time()
+                    print("Image captured and detected! Processing... ")
+                    
+                    # move it to hopper, also renaming it to the current datetime stamp
+                    new_file_name:str = timestamp() + ".jpg"
+                    new_file_path:str = "./hopper/" + new_file_name
+                    os.rename("./temp.jpg", new_file_path) # rename and move to hopper
+                    print("New captured frame processed and moved to hopper with name '" + new_file_name + "'!")
+
+                    # try to upload to azure blob?
+                    if UploadAzureBlob:
+                        try:
+                            
+                            # upload
+                            print("Uploading '" + new_file_name + "' now...")
+                            data:bytes = open(new_file_path, "rb")
+                            upload(data, new_file_name)
+                            print("Uploaded!")
+
+                            # if uploaded successfully, delete!
+                            print("Deleting file '" + new_file_name + "'...")
+                            os.remove(new_file_path)
+                            print("Deleted!")
+                        except:
+                            print("Upload to Azure Blob Storage failed! It will remain in the hopper for later.")
+
+                    imgs_captured = imgs_captured + 1
+
+                else:
+                    if image_last_captured_at == None:
+                        print("@ " + str(int(time.time())) + ": No captured image detected yet!")
+                    else:
+                        time_elapsed:float = time.time() - image_last_captured_at
+                        print(str(imgs_captured) + " images captured so far, last one " + str(int(time_elapsed)) + " seconds ago.")
+                    time.sleep(1.0)
+        except Exception as ex:
+            msg:str = "Fatal error encountered during capture loop. Quitting now. Error encountered: " + str(ex)
+            print(msg)
+            log_error(msg)
+            exit()
             
     elif i == "2":
         print()
