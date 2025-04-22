@@ -51,6 +51,11 @@ def upload(data:bytes, blob_name:str = None) -> None:
     else:
         bc.upload_blob(data)
 
+def log_error(msg:str) -> None:
+    f = open("./error.txt", "a")
+    f.write(str(datetime.datetime.now()) + ": " + msg + "\n")
+    f.close()
+
 
 def main() -> None:
 
