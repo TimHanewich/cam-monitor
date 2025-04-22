@@ -54,5 +54,7 @@ Run `sudo iwconfig wlan0 power off` to disable power management your SBC.
 
 You can also run `iwconfig` which will show you, for wlan0, if Power Management is turned on or off.
 
+[This article](https://www.dzombak.com/blog/2023/12/maintaining-a-solid-wifi-connection-on-raspberry-pi/) looks great too.
+
 ## Notable Commits
 - `d975340594f16072ccf5e394e707d44f4d240ad8` - last commit before moving to ffmpeg streaming technique.
