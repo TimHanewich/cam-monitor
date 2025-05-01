@@ -25,6 +25,7 @@ namespace CMonitorAdministration
                 ToDo.AddChoice("Download images between a date range");
                 ToDo.AddChoice("Download images by prefix");
                 ToDo.AddChoice("Check most recent image upload");
+                ToDo.AddChoice("Rename a series of photos in sequential order");
                 ToDo.AddChoice("Exit");
 
                 //Ask
@@ -48,7 +49,7 @@ namespace CMonitorAdministration
 
                     //Get the container
                     BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
-                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/]."); 
+                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/].");
 
                     //Get begin date?
                     DateTime starting = DateTime.UtcNow.AddDays(-7); //default to 1 week
@@ -113,7 +114,7 @@ namespace CMonitorAdministration
 
                     //Get the container
                     BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
-                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/]."); 
+                    AnsiConsole.MarkupLine("Great, I will download images from [bold]" + ContainerToSearch + "[/].");
 
                     //Ask for the prefix.
                     string prefix = AnsiConsole.Ask<string>("What is the prefix?");
@@ -150,7 +151,7 @@ namespace CMonitorAdministration
 
                     //Get the container
                     BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
-                    AnsiConsole.MarkupLine("Great, I will search container [bold]" + ContainerToSearch + "[/] for the most recent image upload."); 
+                    AnsiConsole.MarkupLine("Great, I will search container [bold]" + ContainerToSearch + "[/] for the most recent image upload.");
 
                     //Begin search
                     DateTime FurthestSearch = DateTime.UtcNow.AddDays(-7);
@@ -165,7 +166,7 @@ namespace CMonitorAdministration
                             string prefix = ToSearchNow.Year.ToString("0000") + ToSearchNow.Month.ToString("00") + ToSearchNow.Day.ToString("00");
                             Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix); //Search on the date (using prefix)
                             AnsiConsole.MarkupLine("[bold]" + items.Count().ToString("#,##0") + "[/] photos found");
-                            
+
                             //If there are items, get the most recent one!
                             if (items.Count() > 0)
                             {
@@ -192,7 +193,7 @@ namespace CMonitorAdministration
                                 {
                                     AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
                                 }
-                                
+
                                 Console.WriteLine();
                                 answered = true; //Mark as answered so other loops know to ignore!
                             }
@@ -204,6 +205,28 @@ namespace CMonitorAdministration
                     {
                         AnsiConsole.MarkupLine("[red]I looked as far back as " + ToSearch[0].ToShortDateString() + " and was unable to find a photo taken! The most recent photo was likely taken before then.[/]");
                     }
+                }
+                else if (WantToDo == "Rename a series of photos in sequential order")
+                {
+                    string folder = AnsiConsole.Ask<string>("What is the folder that contains the files you want to rename?");
+                    folder = folder.Replace("\"", "");
+
+                    //Check that it is a valid folder
+                    if (System.IO.Directory.Exists(folder) == false)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' is not a valid folder.[/]");
+                    }
+
+                    //Check the folder has files in it
+                    string[] files = System.IO.Directory.GetFiles(folder);
+                    if (files.Length == 0)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' does not have any files in it.[/]");
+                    }
+
+                    //Go!
+                    AnsiConsole.MarkupLine("[bold]" + files.Length.ToString("#,##0") + "[/] files found.");
+                    RenameSequential(folder);
                 }
                 else if (WantToDo == "Exit")
                 {
