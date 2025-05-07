@@ -8,7 +8,7 @@ import subprocess
 import atexit
 
 ##### SETTINGS #####
-ffmpeg_cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video0 -vf \"fps=0.01667,drawtext=text='%{localtime} UTC': x=10: y=10: fontcolor=white: fontsize=24: box=1: boxcolor=0x00000099\" -update 1 ./temp.jpg"   # same as above, but without the font file fully specified. For some reason, despite defaulting to using font file "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", it still seems to work without pixelation. 
+ffmpeg_cmd:str = "ffmpeg -video_size 1280x720 -i /dev/video0 -vf \"fps=0.01667\" -update 1 ./temp.jpg"   # same as above, but without the font file fully specified. For some reason, despite defaulting to using font file "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf", it still seems to work without pixelation. 
 azure_blob_container_name:str = "camera1"
 ####################
 
