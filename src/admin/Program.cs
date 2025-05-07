@@ -23,16 +23,16 @@ namespace CMonitorAdministration
                 SelectionPrompt<string> ToDo = new SelectionPrompt<string>();
                 AnsiConsole.MarkupLine("[bold][underline]Welcome to CMonitor Admin Application![/][/]");
                 ToDo.Title("What do you want to do?");
-                ToDo.AddChoice("Download images between a date range");
                 ToDo.AddChoice("Download images by prefix");
                 ToDo.AddChoice("Check most recent image upload");
-                ToDo.AddChoice("Rename a series of photos in sequential order");
-                ToDo.AddChoice("Stamp the date/time on each photo in a folder according to file name");
+                ToDo.AddChoice("Stage 1: Download images between a date range");
+                ToDo.AddChoice("Stage 2: Stamp the date/time on each photo in a folder according to file name");
+                ToDo.AddChoice("Stage 3: Rename a series of photos in sequential order");
                 ToDo.AddChoice("Exit");
 
                 //Ask
                 string WantToDo = AnsiConsole.Prompt(ToDo);
-                if (WantToDo == "Download images between a date range")
+                if (WantToDo == "Stage 1: Download images between a date range")
                 {
                     //Authenticate w/ azure blob storage
                     AnsiConsole.Markup("[italic]Setting up blob storage...[/] ");
@@ -208,7 +208,7 @@ namespace CMonitorAdministration
                         AnsiConsole.MarkupLine("[red]I looked as far back as " + ToSearch[0].ToShortDateString() + " and was unable to find a photo taken! The most recent photo was likely taken before then.[/]");
                     }
                 }
-                else if (WantToDo == "Rename a series of photos in sequential order")
+                else if (WantToDo == "Stage 3: Rename a series of photos in sequential order")
                 {
                     string folder = AnsiConsole.Ask<string>("What is the folder that contains the files you want to rename?");
                     folder = folder.Replace("\"", "");
@@ -230,7 +230,7 @@ namespace CMonitorAdministration
                     AnsiConsole.MarkupLine("[bold]" + files.Length.ToString("#,##0") + "[/] files found.");
                     RenameSequential(folder);
                 }
-                else if (WantToDo == "Stamp the date/time on each photo in a folder according to file name")
+                else if (WantToDo == "Stage 2: Stamp the date/time on each photo in a folder according to file name")
                 {
                     string folder = AnsiConsole.Ask<string>("What is the folder that contains the files?");
                     folder = folder.Replace("\"", "");
