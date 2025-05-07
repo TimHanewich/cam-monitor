@@ -4,6 +4,7 @@ using Azure.Storage.Blobs;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Models;
+using System.Drawing;
 
 namespace CMonitorAdministration
 {
@@ -11,7 +12,8 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            MainProgramAsync().Wait();
+            //MainProgramAsync().Wait();
+            DrawDateTimeStampOnImage(@"C:\Users\timh\Downloads\tah\cam-monitor\20250507174357.jpg");
         }
 
         public async static Task MainProgramAsync()
@@ -264,13 +266,13 @@ namespace CMonitorAdministration
             AnsiConsole.MarkupLine("Proceeding to download [bold][navy]" + names.Length.ToString("#,##0") + "[/][/] photos!");
             int BytesDownloaded = 0;
             for (int t = 0; t < names.Length; t++)
-            {    
+            {
 
                 //Print what we're doing
                 string blobname = names[t];
                 float percent = Convert.ToSingle(t) / Convert.ToSingle(names.Length);
                 AnsiConsole.Markup("[gray](" + t.ToString("#,##0") + " / " + names.Length.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/]" + " Downloading [bold][navy]" + blobname + "[/][/]... ");
-                
+
                 //Download into memory stream
                 BlobClient bc = bcc.GetBlobClient(blobname);
                 MemoryStream ms = new MemoryStream();
@@ -356,7 +358,7 @@ namespace CMonitorAdministration
             //Get all files
             AnsiConsole.Markup("[italic]Reading files... [/]");
             string[] allfiles = System.IO.Directory.GetFiles(folder_path);
-            AnsiConsole.MarkupLine("[italic]" + allfiles.Length.ToString("#,##0") +  " files listed.[/]");
+            AnsiConsole.MarkupLine("[italic]" + allfiles.Length.ToString("#,##0") + " files listed.[/]");
 
             //Ensure each one is a valid datetime stamp (is an integer only)
             List<string> InvalidFiles = new List<string>();
@@ -456,6 +458,47 @@ namespace CMonitorAdministration
         }
 
 
+        //Apply datetime stamp to image (the file name should be the datetime stamp!)
+        public static void DrawDateTimeStampOnImage(string image_path, string time_zone_suffix = "UTC")
+        {
+            //Get out the name
+            string file_name = System.IO.Path.GetFileNameWithoutExtension(image_path);
+            DateTime dt;
+            try
+            {
+                dt = TimeStamper.TimeStampToDateTime(file_name);
+            }
+            catch
+            {
+                throw new Exception("File name '" + file_name + "' is not a valid datetime stamp in YYYYMMDDHHSS format!");
+            }
+
+            Stream s = System.IO.File.OpenRead(image_path);
+
+            //Open the image
+            Bitmap bm = new Bitmap(s);
+            Graphics g = Graphics.FromImage(bm);
+
+            //Prepare drawing (writing) tools
+            Font f = new Font("Arial", 16, FontStyle.Regular);
+            Brush b = new SolidBrush(System.Drawing.Color.White);
+            PointF p = new PointF(0, 0);
+
+            //Measure text size
+            string txt = dt.Year.ToString("0000") + "-" + dt.Month.ToString("00") + "-" + dt.Day.ToString("00") + " " + dt.Hour.ToString("00") + ":" + dt.Minute.ToString("00") + ":" + dt.Second.ToString("00") + " " + time_zone_suffix;
+            SizeF TextSize = g.MeasureString(txt, f);
+
+            //Draw rectangle background
+            Brush background = new SolidBrush(System.Drawing.Color.FromArgb(150, 0, 0, 0));
+            g.FillRectangle(background, 0, 0, TextSize.Width, TextSize.Height);
+
+            //Draw text
+            g.DrawString(txt, f, b, p);
+
+            //Save it
+            s.Close(); //close the file before overwriting it.
+            bm.Save(image_path, System.Drawing.Imaging.ImageFormat.Jpeg);
+        }
 
     }
 }
