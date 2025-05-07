@@ -12,8 +12,7 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            //MainProgramAsync().Wait();
-            DrawDateTimeStampOnImage(@"C:\Users\timh\Downloads\tah\cam-monitor\20250507174357.jpg");
+            MainProgramAsync().Wait();
         }
 
         public async static Task MainProgramAsync()
@@ -28,6 +27,7 @@ namespace CMonitorAdministration
                 ToDo.AddChoice("Download images by prefix");
                 ToDo.AddChoice("Check most recent image upload");
                 ToDo.AddChoice("Rename a series of photos in sequential order");
+                ToDo.AddChoice("Stamp the date/time on each photo in a folder according to file name");
                 ToDo.AddChoice("Exit");
 
                 //Ask
@@ -229,6 +229,27 @@ namespace CMonitorAdministration
                     //Go!
                     AnsiConsole.MarkupLine("[bold]" + files.Length.ToString("#,##0") + "[/] files found.");
                     RenameSequential(folder);
+                }
+                else if (WantToDo == "Stamp the date/time on each photo in a folder according to file name")
+                {
+                    string folder = AnsiConsole.Ask<string>("What is the folder that contains the files?");
+                    folder = folder.Replace("\"", "");
+
+                    //Check that it is a valid folder
+                    if (System.IO.Directory.Exists(folder) == false)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' is not a valid folder.[/]");
+                    }
+
+                    //Check the folder has files in it
+                    string[] files = System.IO.Directory.GetFiles(folder);
+                    if (files.Length == 0)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' does not have any files in it.[/]");
+                    }
+
+                    //Go!
+                    BatchDrawDateTimeStampOnImage(folder);
                 }
                 else if (WantToDo == "Exit")
                 {
@@ -458,7 +479,7 @@ namespace CMonitorAdministration
         }
 
 
-        //Apply datetime stamp to image (the file name should be the datetime stamp!)
+        //Apply datetime stamp to SINGLE image (the file name should be the datetime stamp!)
         public static void DrawDateTimeStampOnImage(string image_path, string time_zone_suffix = "UTC")
         {
             //Get out the name
@@ -498,6 +519,57 @@ namespace CMonitorAdministration
             //Save it
             s.Close(); //close the file before overwriting it.
             bm.Save(image_path, System.Drawing.Imaging.ImageFormat.Jpeg);
+        }
+
+        public static void BatchDrawDateTimeStampOnImage(string directory)
+        {
+            //Read each
+            AnsiConsole.Markup("[gray][italic]Reading files in folder... [/][/]");
+            string[] allfiles = System.IO.Directory.GetFiles(directory);
+
+            //Ensure each one is a valid datetime stamp (is an integer only)
+            List<string> InvalidFiles = new List<string>();
+            foreach (string file in allfiles)
+            {
+                try
+                {
+                    TimeStamper.TimeStampToDateTime(Path.GetFileNameWithoutExtension(file));
+                }
+                catch
+                {
+                    InvalidFiles.Add(file);
+                }
+            }
+
+            //If there are some invalid files, show them
+            if (InvalidFiles.Count > 0)
+            {
+                AnsiConsole.MarkupLine("[red]There are some invalid files in the directory that are not named as a true datetime stamp (a pure integer)! They are listed below:[/]");
+                foreach (string invalidfile in InvalidFiles)
+                {
+                    AnsiConsole.MarkupLine("[red]" + invalidfile + "[/]");
+                }
+                AnsiConsole.MarkupLine("[red]Please remove these before proceeding again.[/]");
+                return;
+            }
+
+            AnsiConsole.Markup("[gray][italic]" + allfiles.Length.ToString("#,##0") + " files found![/][/]");
+
+
+            //Go!
+            for (int i = 0; i < allfiles.Length; i++)
+            {
+                //Write status
+                float percent = Convert.ToSingle(i) / Convert.ToSingle(allfiles.Length);
+                string status = "(" + i.ToString("#,##0") + " / " + allfiles.Length.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ") Stamping " + Path.GetFileName(allfiles[i]) + "... ";
+                AnsiConsole.Markup(status);
+
+                //Stamp!
+                DrawDateTimeStampOnImage(allfiles[i]);
+
+                //Complete
+                AnsiConsole.MarkupLine("[green]success![/]");
+            } 
         }
 
     }
