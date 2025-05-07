@@ -318,18 +318,6 @@ namespace CMonitorAdministration
             AnsiConsole.MarkupLine("[green]" + names.Length.ToString("#,##0") + " photos downloaded to '" + System.IO.Path.GetFullPath(DownloadPath) + "'![/]");
             AnsiConsole.MarkupLine("[green]" + mb_downloaded.ToString("#,##0.0") + " MB downloaded![/]");
             Console.WriteLine();
-
-            //Do you also want to rename them in order of oldest to newest (i.e. "0000001", "0000002", "0000003", etc.)
-            SelectionPrompt<string> RenameOption = new SelectionPrompt<string>();
-            RenameOption.Title("Do you also want to rename them in order of oldest to newest (i.e. '0000001', '0000002', '0000003', etc.)");
-            RenameOption.AddChoice("Yes");
-            RenameOption.AddChoice("No");
-            string RenameOptionSelection = AnsiConsole.Prompt(RenameOption);
-            if (RenameOptionSelection == "Yes")
-            {
-                RenameSequential(DownloadPath);
-                Console.WriteLine();
-            }
         }
 
 
