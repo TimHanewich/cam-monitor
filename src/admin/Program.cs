@@ -505,7 +505,7 @@ namespace CMonitorAdministration
                 hour = 12; //12 AM (morning, which would be an hour of 0)
                 AMPM = "AM";
             }
-            if (hour == 12)
+            else if (hour == 12)
             {
                 AMPM = "PM"; //change to PM, but leave at PM
             }
