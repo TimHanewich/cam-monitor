@@ -468,19 +468,24 @@ namespace CMonitorAdministration
 
 
         //Apply datetime stamp to SINGLE image (the file name should be the datetime stamp!)
-        public static void DrawDateTimeStampOnImage(string image_path, string time_zone_suffix = "UTC")
+        //It expects the file name to be the datetime the photo was captured in UTC time. This is important!
+        public static void DrawDateTimeStampOnImage(string image_path)
         {
-            //Get out the name
+            //Get datetime from file name
             string file_name = System.IO.Path.GetFileNameWithoutExtension(image_path);
-            DateTime dt;
+            DateTime utc;
             try
             {
-                dt = TimeStamper.TimeStampToDateTime(file_name);
+                utc = TimeStamper.TimeStampToDateTime(file_name);
             }
             catch
             {
                 throw new Exception("File name '" + file_name + "' is not a valid datetime stamp in YYYYMMDDHHSS format!");
             }
+
+            //Convert from UTC to EST
+            TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
+            DateTime est = TimeZoneInfo.ConvertTimeFromUtc(utc, tzi);
 
             Stream s = System.IO.File.OpenRead(image_path);
 
@@ -494,7 +499,7 @@ namespace CMonitorAdministration
             PointF p = new PointF(0, 0);
 
             //Measure text size
-            string txt = dt.Year.ToString("0000") + "-" + dt.Month.ToString("00") + "-" + dt.Day.ToString("00") + " " + dt.Hour.ToString("00") + ":" + dt.Minute.ToString("00") + ":" + dt.Second.ToString("00") + " " + time_zone_suffix;
+            string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + est.Hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
             //Draw rectangle background
