@@ -487,9 +487,8 @@ namespace CMonitorAdministration
             TimeZoneInfo tzi = TimeZoneInfo.FindSystemTimeZoneById("Eastern Standard Time");
             DateTime est = TimeZoneInfo.ConvertTimeFromUtc(utc, tzi);
 
-            Stream s = System.IO.File.OpenRead(image_path);
-
             //Open the image
+            Stream s = System.IO.File.OpenRead(image_path);
             Bitmap bm = new Bitmap(s);
             Graphics g = Graphics.FromImage(bm);
 
@@ -499,7 +498,14 @@ namespace CMonitorAdministration
             PointF p = new PointF(0, 0);
 
             //Measure text size
-            string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + est.Hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " EST";
+            string AMPM = "AM";
+            int hour = est.Hour;
+            if (hour > 12) //flip to PM and roll back by 12
+            {
+                hour = hour - 12;
+                AMPM = "PM";
+            }
+            string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + AMPM + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
             //Draw rectangle background
