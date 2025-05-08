@@ -505,7 +505,7 @@ namespace CMonitorAdministration
                 hour = hour - 12;
                 AMPM = "PM";
             }
-            string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + AMPM + " EST";
+            string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " " + AMPM + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
             //Draw rectangle background
