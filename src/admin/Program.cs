@@ -500,15 +500,21 @@ namespace CMonitorAdministration
             //Measure text size
             string AMPM = "AM";
             int hour = est.Hour;
-            if (hour > 12) //flip to PM and roll back by 12
+            if (hour == 0) //12 AM
+            {
+                hour = 12; //12 AM (morning, which would be an hour of 0)
+                AMPM = "AM";
+            }
+            if (hour == 12)
+            {
+                AMPM = "PM"; //change to PM, but leave at PM
+            }
+            else if (hour > 12) //flip to PM and roll back by 12
             {
                 hour = hour - 12;
                 AMPM = "PM";
             }
-            else if (hour == 0)
-            {
-                hour = 12; //12 AM (morning, which would be an hour of 0)
-            }
+            
             string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " " + AMPM + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
