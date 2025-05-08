@@ -505,6 +505,10 @@ namespace CMonitorAdministration
                 hour = hour - 12;
                 AMPM = "PM";
             }
+            else if (hour == 0)
+            {
+                hour = 12; //12 AM (morning, which would be an hour of 0)
+            }
             string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " " + AMPM + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
