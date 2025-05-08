@@ -434,7 +434,9 @@ namespace CMonitorAdministration
                     float percent_complete = Convert.ToSingle(ticker) / Convert.ToSingle(FilesToRename.Count);
                     string path_old = file;
                     string path_new = Path.Combine(dir, ticker.ToString("0000000#") + ".jpg");
-                    AnsiConsole.Markup("[gray](" + percent_complete.ToString("#0.0%") + ")[/] Renaming '" + path_old + "' to '" + path_new + "'... ");
+                    string path_old_short = Path.GetFileName(path_old);
+                    string path_new_short = Path.GetFileName(path_new);
+                    AnsiConsole.Markup("[gray](" + percent_complete.ToString("#0.0%") + ")[/] Renaming '" + path_old_short + "' to '" + path_new_short + "'... ");
                     System.IO.File.Move(path_old, path_new); //rename
                     AnsiConsole.MarkupLine("Success!");
                     ticker = ticker + 1;
