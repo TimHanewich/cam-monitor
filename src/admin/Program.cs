@@ -695,6 +695,8 @@ namespace CMonitorAdministration
                 Bitmap img1 = new Bitmap(ToKeep[ToKeep.Count - 1]); //Load the most recent keeper
                 Bitmap img2 = new Bitmap(FilesSortedFromOldestToNewest[i]); //Load the one we are comparing to now
                 float ss = SimilarityScore(img1, img2); //compare
+                img1.Dispose();
+                img2.Dispose();
                 if (ss > sensitivity)
                 {
                     ToKeep.Add(FilesSortedFromOldestToNewest[i]);
