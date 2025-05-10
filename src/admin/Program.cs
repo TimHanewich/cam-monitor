@@ -672,6 +672,16 @@ namespace CMonitorAdministration
             }
             AnsiConsole.MarkupLine("[italic]done![/]");
 
+            //Ask what they want the tolerance to be?
+            Console.WriteLine();
+            AnsiConsole.MarkupLine("Please express how [italic]different[/] a photo has to be from the previous photo to be considered new activity.");
+            AnsiConsole.MarkupLine("Express this as a number from [bold]0.0 to 1.0[/]");
+            AnsiConsole.MarkupLine("0.0 = sensitive to changes");
+            AnsiConsole.MarkupLine("1.0 = insensitive to changes (very discriminating)");
+            AnsiConsole.MarkupLine("[bold][blue]0.9[/][/] is recommended.");
+            float sensitivity = AnsiConsole.Ask<float>("Sensitivity to changes? ", 0.9f);
+            Console.WriteLine();
+
             //Figure out what to keep
             List<string> ToKeep = new List<string>();
             ToKeep.Add(FilesSortedFromOldestToNewest[0]); //keep the first one
@@ -685,7 +695,7 @@ namespace CMonitorAdministration
                 Bitmap img1 = new Bitmap(ToKeep[ToKeep.Count - 1]); //Load the most recent keeper
                 Bitmap img2 = new Bitmap(FilesSortedFromOldestToNewest[i]); //Load the one we are comparing to now
                 float ss = SimilarityScore(img1, img2); //compare
-                if (ss < 0.9f)
+                if (ss > sensitivity)
                 {
                     ToKeep.Add(FilesSortedFromOldestToNewest[i]);
                 }
@@ -780,6 +790,7 @@ namespace CMonitorAdministration
             Bitmap resized = new Bitmap(new_width, new_height);
             Graphics g = Graphics.FromImage(resized);
             g.DrawImage(original, 0, 0, new_width, new_height);
+            g.Dispose();
             return resized;
         }
 
