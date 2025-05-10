@@ -695,6 +695,7 @@ namespace CMonitorAdministration
             }
 
             //Tell the user the results
+            Console.WriteLine();
             AnsiConsole.MarkupLine("Of the [bold][blue]" + FilesSortedFromOldestToNewest.Count.ToString("#,##0") + "[/][/] images in the folder...");
             AnsiConsole.MarkupLine("[bold][blue]" + ToKeep.Count.ToString("#,##0") + "[/][/] were of activity and will be kept");
             int WillBeDeletedCount = FilesSortedFromOldestToNewest.Count - ToKeep.Count;
@@ -729,6 +730,21 @@ namespace CMonitorAdministration
                 throw new Exception("Unable to assess similarity between these two images! They must have identical dimensions!");
             }
 
+            //Resize down to a goal size
+            int NumPixels = img1.Height * img1.Width;
+            int GoalSize = 50000; //the total number of pixels we wish to match... will reduce size down until we get there
+            if (NumPixels > GoalSize)
+            {
+                //Calculate the new size
+                float ResizeRatio = Convert.ToSingle(GoalSize) / Convert.ToSingle(NumPixels);
+                int NewWidth = Convert.ToInt32(Convert.ToSingle(img1.Width) * ResizeRatio);
+                int NewHeight = Convert.ToInt32(Convert.ToSingle(img1.Height) * ResizeRatio);
+
+                //Resize!
+                img1 = ResizeBitmap(img1, NewWidth, NewHeight);
+                img2 = ResizeBitmap(img2, NewWidth, NewHeight);
+            }
+
             //Loop through each pixel
             List<float> AllEuclidianDistancePercents = new List<float>(); //list of all differences (as a percentage) for each pixel of the images.
             for (int y = 0; y < img1.Height; y++)
@@ -757,6 +773,14 @@ namespace CMonitorAdministration
             int gDiff = color1.G - color2.G;
             int bDiff = color1.B - color2.B;
             return Convert.ToSingle(Math.Sqrt((rDiff * rDiff) + (gDiff * gDiff) + (bDiff * bDiff)));
+        }
+
+        public static Bitmap ResizeBitmap(Bitmap original, int new_width, int new_height)
+        {
+            Bitmap resized = new Bitmap(new_width, new_height);
+            Graphics g = Graphics.FromImage(resized);
+            g.DrawImage(original, 0, 0, new_width, new_height);
+            return resized;
         }
 
         #endregion
