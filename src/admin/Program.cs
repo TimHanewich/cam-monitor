@@ -13,12 +13,7 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            //MainProgramAsync().Wait();
-
-            Bitmap img1 = new Bitmap(@"C:\Users\timh\Downloads\tah\cam-monitor\download-20250509\20250509000956.jpg");
-            Bitmap img2 = new Bitmap(@"C:\Users\timh\Downloads\tah\cam-monitor\download-20250509\20250509001056.jpg");
-
-            Console.WriteLine(SimilarityScore(img1, img2));
+            MainProgramAsync().Wait();
         }
 
         public async static Task MainProgramAsync()
@@ -34,6 +29,7 @@ namespace CMonitorAdministration
                 ToDo.AddChoice("Stage 1: Download images between a date range");
                 ToDo.AddChoice("Stage 2: Stamp the date/time on each photo in a folder according to file name");
                 ToDo.AddChoice("Stage 3: Rename a series of photos in sequential order");
+                ToDo.AddChoice("EXPERIMENTAL: Isolate Activity");
                 ToDo.AddChoice("Exit");
 
                 //Ask
@@ -262,6 +258,27 @@ namespace CMonitorAdministration
                     Console.WriteLine();
                     AnsiConsole.MarkupLine("[bold]Bye bye![/]");
                     Environment.Exit(0);
+                }
+                else if (WantToDo == "EXPERIMENTAL: Isolate Activity")
+                {
+                    string folder = AnsiConsole.Ask<string>("What is the folder that contains the files?");
+                    folder = folder.Replace("\"", "");
+
+                    //Check that it is a valid folder
+                    if (System.IO.Directory.Exists(folder) == false)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' is not a valid folder.[/]");
+                    }
+
+                    //Check the folder has files in it
+                    string[] files = System.IO.Directory.GetFiles(folder);
+                    if (files.Length == 0)
+                    {
+                        AnsiConsole.MarkupLine("[red]'" + folder + "' does not have any files in it.[/]");
+                    }
+
+                    //Go!
+                    IsolateActivityFrames(folder);
                 }
                 else
                 {
@@ -591,6 +608,118 @@ namespace CMonitorAdministration
 
 
         #region "EXPERIMENTAL#
+
+        //Delete images from a folder where nothing changes much
+        public static void IsolateActivityFrames(string folder)
+        {
+            //Get all files
+            AnsiConsole.Markup("[italic]Reading files... [/]");
+            string[] allfiles = System.IO.Directory.GetFiles(folder);
+            AnsiConsole.MarkupLine("[italic]" + allfiles.Length.ToString("#,##0") + " files listed.[/]");
+
+            //Ensure each one is a valid datetime stamp (is an integer only)
+            List<string> InvalidFiles = new List<string>();
+            foreach (string file in allfiles)
+            {
+                try
+                {
+                    TimeStamper.TimeStampToDateTime(Path.GetFileNameWithoutExtension(file));
+                }
+                catch
+                {
+                    InvalidFiles.Add(file);
+                }
+            }
+
+            //If there are some invalid files, show them
+            if (InvalidFiles.Count > 0)
+            {
+                AnsiConsole.MarkupLine("[red]There are some invalid files in the directory that are not named as a true datetime stamp (a pure integer)! They are listed below:[/]");
+                foreach (string invalidfile in InvalidFiles)
+                {
+                    AnsiConsole.MarkupLine("[red]" + invalidfile + "[/]");
+                }
+                AnsiConsole.MarkupLine("[red]Please remove these before proceeding again.[/]");
+                return;
+            }
+
+            //Construct dict of datetimes
+            AnsiConsole.Markup("[italic]Parsing timestamps from files... [/]");
+            Dictionary<string, DateTime> FileDateTimes = new Dictionary<string, DateTime>();
+            foreach (string file in allfiles)
+            {
+                string name = System.IO.Path.GetFileNameWithoutExtension(file);
+                DateTime ts = TimeStamper.TimeStampToDateTime(name);
+                FileDateTimes[file] = ts;
+            }
+            AnsiConsole.MarkupLine("[italic]done![/]");
+
+            //Arrange in order from oldest to newest
+            AnsiConsole.Markup("[italic]Arranging in order... [/]");
+            List<string> FilesSortedFromOldestToNewest = new List<string>(); // In order from oldest to newest
+            while (FileDateTimes.Count > 0)
+            {
+                KeyValuePair<string, DateTime> winner = FileDateTimes.First(); //the oldest
+                foreach (KeyValuePair<string, DateTime> kvp in FileDateTimes)
+                {
+                    if (kvp.Value < winner.Value)
+                    {
+                        winner = kvp;
+                    }
+                }
+                FilesSortedFromOldestToNewest.Add(winner.Key); //Add it
+                FileDateTimes.Remove(winner.Key); //Remove
+            }
+            AnsiConsole.MarkupLine("[italic]done![/]");
+
+            //Figure out what to keep
+            List<string> ToKeep = new List<string>();
+            ToKeep.Add(FilesSortedFromOldestToNewest[0]); //keep the first one
+            for (int i = 1; i < FilesSortedFromOldestToNewest.Count; i++)
+            {
+                //progress indicator
+                float percent = Convert.ToSingle(i) / Convert.ToSingle(FilesSortedFromOldestToNewest.Count);
+                AnsiConsole.Markup("[gray](" + i.ToString("#,##0") + " / " + FilesSortedFromOldestToNewest.Count.ToString("#,##0") + ", " + percent.ToString("#0.0%") + ")[/] Observing [bold][blue]" + System.IO.Path.GetFileName(FilesSortedFromOldestToNewest[i]) + "[/][/]...");
+
+                //Perform comparison
+                Bitmap img1 = new Bitmap(ToKeep[ToKeep.Count - 1]); //Load the most recent keeper
+                Bitmap img2 = new Bitmap(FilesSortedFromOldestToNewest[i]); //Load the one we are comparing to now
+                float ss = SimilarityScore(img1, img2); //compare
+                if (ss < 0.9f)
+                {
+                    ToKeep.Add(FilesSortedFromOldestToNewest[i]);
+                }
+
+                //Compplete!
+                AnsiConsole.MarkupLine("complete!");
+            }
+
+            //Tell the user the results
+            AnsiConsole.MarkupLine("Of the [bold][blue]" + FilesSortedFromOldestToNewest.Count.ToString("#,##0") + "[/][/] images in the folder...");
+            AnsiConsole.MarkupLine("[bold][blue]" + ToKeep.Count.ToString("#,##0") + "[/][/] were of activity and will be kept");
+            int WillBeDeletedCount = FilesSortedFromOldestToNewest.Count - ToKeep.Count;
+            AnsiConsole.MarkupLine("[bold][blue]" + WillBeDeletedCount.ToString("#,##0") + "[/][/] had no change and will be deleted.");
+
+            //Continue?
+            Console.WriteLine();
+            SelectionPrompt<string> ContinuePrompt = new SelectionPrompt<string>();
+            ContinuePrompt.AddChoices("Yes", "No");
+            string ContinueAnswer = AnsiConsole.Prompt<string>(ContinuePrompt);
+            if (ContinueAnswer == "Yes")
+            {
+                //Delete
+                foreach (string file in FilesSortedFromOldestToNewest)
+                {
+                    if (ToKeep.Contains(file) == false)
+                    {
+                        AnsiConsole.Markup("Deleting [bold][red]" + System.IO.Path.GetFileName(file) + "[/][/]... ");
+                        System.IO.File.Delete(file);
+                        AnsiConsole.MarkupLine("deleted!");
+                    }
+                }
+                AnsiConsole.MarkupLine("[italic]Complete![/]");
+            }
+        }
 
         //Compares how similar two images are and returns the similarty as a percentage from 0.0 to 1.0. 0.0 would mean they are not similar at all, 1.0 means they are identical
         public static float SimilarityScore(Bitmap img1, Bitmap img2)
