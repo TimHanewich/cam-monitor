@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Azure.Storage.Blobs.Models;
 using System.Drawing;
+using System.Runtime.Intrinsics.Arm;
 
 namespace CMonitorAdministration
 {
@@ -12,7 +13,12 @@ namespace CMonitorAdministration
     {
         public static void Main(string[] args)
         {
-            MainProgramAsync().Wait();
+            //MainProgramAsync().Wait();
+
+            Bitmap img1 = new Bitmap(@"C:\Users\timh\Downloads\tah\cam-monitor\download-20250509\20250509000956.jpg");
+            Bitmap img2 = new Bitmap(@"C:\Users\timh\Downloads\tah\cam-monitor\download-20250509\20250509001056.jpg");
+
+            Console.WriteLine(SimilarityScore(img1, img2));
         }
 
         public async static Task MainProgramAsync()
@@ -516,7 +522,7 @@ namespace CMonitorAdministration
                 hour = hour - 12;
                 AMPM = "PM";
             }
-            
+
             string txt = est.Year.ToString("0000") + "-" + est.Month.ToString("00") + "-" + est.Day.ToString("00") + " " + hour.ToString("00") + ":" + est.Minute.ToString("00") + ":" + est.Second.ToString("00") + " " + AMPM + " EST";
             SizeF TextSize = g.MeasureString(txt, f);
 
@@ -580,8 +586,52 @@ namespace CMonitorAdministration
 
                 //Complete
                 AnsiConsole.MarkupLine("[green]success![/]");
-            } 
+            }
         }
+
+
+        #region "EXPERIMENTAL#
+
+        //Compares how similar two images are and returns the similarty as a percentage from 0.0 to 1.0. 0.0 would mean they are not similar at all, 1.0 means they are identical
+        public static float SimilarityScore(Bitmap img1, Bitmap img2)
+        {
+            if (img1.Width != img2.Width || img1.Height != img2.Height)
+            {
+                throw new Exception("Unable to assess similarity between these two images! They must have identical dimensions!");
+            }
+
+            //Loop through each pixel
+            List<float> AllEuclidianDistancePercents = new List<float>(); //list of all differences (as a percentage) for each pixel of the images.
+            for (int y = 0; y < img1.Height; y++)
+            {
+                for (int x = 0; x < img1.Width; x++)
+                {
+
+                    //Get the two colors
+                    System.Drawing.Color pix1 = img1.GetPixel(x, y);
+                    System.Drawing.Color pix2 = img2.GetPixel(x, y);
+
+                    //Determine how different they are
+                    float EuclidianDistance = ColorDistance(pix1, pix2);
+                    float EuclidianDistancePercent = EuclidianDistance / 441.67f; //the MAXIMUM euclidian distance is 441.67, so express it as a percentage
+                    AllEuclidianDistancePercents.Add(EuclidianDistancePercent);
+                }
+            }
+
+            return 1.0f - AllEuclidianDistancePercents.Average(); //inverse it because it is a similarity score... the higher the distance, the lower the similarity should be.
+        }
+
+        //Calculates how different two colors are using the Euclidian Distance formula
+        public static float ColorDistance(System.Drawing.Color color1, System.Drawing.Color color2)
+        {
+            int rDiff = color1.R - color2.R;
+            int gDiff = color1.G - color2.G;
+            int bDiff = color1.B - color2.B;
+            return Convert.ToSingle(Math.Sqrt((rDiff * rDiff) + (gDiff * gDiff) + (bDiff * bDiff)));
+        }
+
+        #endregion
+
 
     }
 }
