@@ -26,40 +26,29 @@ namespace CamMonitorAPI
         [HttpGet]
         public async Task Get()
         {
-            BlobServiceClient bsc = new BlobServiceClient(_bcs.AzureBlobConnectionString);
-            BlobContainerClient bcc = bsc.GetBlobContainerClient("camera1");
-
-            //Search for today
-            string prefix = DateTime.UtcNow.Year.ToString("0000") + DateTime.UtcNow.Month.ToString("00") + DateTime.UtcNow.Day.ToString("00");
-            Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix);
-
-            //If there are none
-            if (items.Count() == 0)
+            LastImageFinder lif = new LastImageFinder(_bcs.AzureBlobConnectionString);
+            ImageInfo ii;
+            try
+            {
+                ii = lif.FindLastImage("camera1", false, 7);
+            }
+            catch (Exception ex)
             {
                 Response.StatusCode = 404;
-                await Response.WriteAsync("There were no images saved for the current UTC day.");
+                Response.Headers["Content-Type"] = "plain/text";
+                await Response.WriteAsync("There was a fatal error while trying to find the last image! Message: " + ex.Message);
                 return;
             }
 
-            //Find the newest (most recent)
-            DateTime newest = new DateTime(1900, 1, 1);
-            foreach (BlobItem bi in items)
-            {
-                string name = bi.Name.ToLower().Replace(".jpg", "");
-                DateTime dt = TimeStamper.TimeStampToDateTime(name);
-                if (dt > newest)
-                {
-                    newest = dt;
-                }
-            }
+            //Draft resposne
+            int secondsAgo = Convert.ToInt32((DateTime.UtcNow - ii.CapturedAtUtc).TotalSeconds);
+            JObject ToReturn = new JObject();
+            ToReturn.Add("secondsAgo", secondsAgo);
 
-            //Convert that to a utc datetime
-            TimeSpan ts = DateTime.UtcNow - newest;
-
-            //Return seconds ago
+            //Respond
             Response.StatusCode = 200;
-            Response.Headers["Content-Type"] = "text/plain";
-            await Response.WriteAsync("The last photo was taken " + ts.TotalSeconds.ToString("#,##0") + " seconds ago.");
+            Response.Headers["Content-Type"] = "application/json";
+            await Response.WriteAsync(ToReturn.ToString());
         }
 
     }

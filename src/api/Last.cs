@@ -26,46 +26,32 @@ namespace CamMonitorAPI
         [HttpGet]
         public async Task Get()
         {
-            BlobServiceClient bsc = new BlobServiceClient(_bcs.AzureBlobConnectionString);
-            BlobContainerClient bcc = bsc.GetBlobContainerClient("camera1");
-
-            //Search for today
-            string prefix = DateTime.UtcNow.Year.ToString("0000") + DateTime.UtcNow.Month.ToString("00") + DateTime.UtcNow.Day.ToString("00");
-            Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix);
-
-            //If there are none
-            if (items.Count() == 0)
+            LastImageFinder lif = new LastImageFinder(_bcs.AzureBlobConnectionString);
+            ImageInfo ii;
+            try
+            {
+                ii = lif.FindLastImage("camera1", true, 7);
+            }
+            catch (Exception ex)
             {
                 Response.StatusCode = 404;
-                await Response.WriteAsync("There were no images saved for the current UTC day.");
+                Response.Headers["Content-Type"] = "plain/text";
+                await Response.WriteAsync("There was a fatal error while trying to find the last image! Message: " + ex.Message);
                 return;
             }
 
-            //Find the newest (most recent)
-            DateTime newest = new DateTime(1900, 1, 1);
-            BlobItem newestBLOB = items.First();
-            foreach (BlobItem bi in items)
+            if (ii.Image == null)
             {
-                string name = bi.Name.ToLower().Replace(".jpg", "");
-                DateTime dt = TimeStamper.TimeStampToDateTime(name);
-                if (dt > newest)
-                {
-                    newest = dt;
-                    newestBLOB = bi;
-                }
+                Response.StatusCode = 404;
+                Response.Headers["Content-Type"] = "plain/text";
+                await Response.WriteAsync("Latest image was found, but unable to download image for unknown reason.");
+                return;
             }
-
-            //Download it
-            BlobClient bc = bcc.GetBlobClient(newestBLOB.Name);
-            MemoryStream ms = new MemoryStream();
-            await bc.DownloadToAsync(ms);
 
             //Write into response
             Response.StatusCode = 200;
             Response.Headers["Content-Type"] = "image/jpeg";
-            ms.Position = 0;
-            await ms.CopyToAsync(Response.Body);
-            ms.Close();
+            await ii.Image.CopyToAsync(Response.Body);
         }
 
     }
