@@ -157,57 +157,37 @@ namespace CMonitorAdministration
                     BlobContainerClient bcc = bsc.GetBlobContainerClient(ContainerToSearch);
                     AnsiConsole.MarkupLine("Great, I will search container [bold]" + ContainerToSearch + "[/] for the most recent image upload.");
 
-                    //Begin search
-                    DateTime FurthestSearch = DateTime.UtcNow.AddDays(-7);
-                    DateTime[] ToSearch = GetDatesBetween(FurthestSearch, DateTime.UtcNow);
-                    bool answered = false;
-                    for (int t = 0; t < ToSearch.Length; t++)
+                    //Search
+                    LastImageFinder lif = new LastImageFinder(GetAzureBlobStorageConnectionString());
+                    ImageInfo? ii = null;
+                    int DaysToSearch = 7;
+                    try
                     {
-                        if (answered == false)
-                        {
-                            DateTime ToSearchNow = ToSearch[ToSearch.Length - 1 - t]; //Inverse direction
-                            AnsiConsole.Markup("Searching on date [bold]" + ToSearchNow.ToShortDateString() + "[/]... ");
-                            string prefix = ToSearchNow.Year.ToString("0000") + ToSearchNow.Month.ToString("00") + ToSearchNow.Day.ToString("00");
-                            Azure.Pageable<BlobItem> items = bcc.GetBlobs(prefix: prefix); //Search on the date (using prefix)
-                            AnsiConsole.MarkupLine("[bold]" + items.Count().ToString("#,##0") + "[/] photos found");
+                        ii = lif.FindLastImage(ContainerToSearch, false, DaysToSearch);
+                    }
+                    catch
+                    {
 
-                            //If there are items, get the most recent one!
-                            if (items.Count() > 0)
-                            {
-                                //Get the most recent
-                                DateTime MostRecent = new DateTime(1900, 1, 1); //Default date (a long time ago so every date is more recent than this!)
-                                foreach (BlobItem item in items)
-                                {
-                                    string timestamp = item.Name.Replace(".jpg", "");
-                                    DateTime thisstamp = TimeStamper.TimeStampToDateTime(timestamp);
-                                    if (thisstamp > MostRecent)
-                                    {
-                                        MostRecent = thisstamp;
-                                    }
-                                }
-
-                                //Return the most recent
-                                TimeSpan ts = DateTime.UtcNow - MostRecent;
-                                AnsiConsole.MarkupLine("The last picture that was taken was taken at [bold]" + MostRecent.ToString() + "[/] UTC");
-                                if (ts.TotalMinutes <= 1)
-                                {
-                                    AnsiConsole.MarkupLine("That was [bold]" + ts.TotalSeconds.ToString("#,##0") + " seconds ago![/]");
-                                }
-                                else // 2 or more minutes
-                                {
-                                    AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
-                                }
-
-                                Console.WriteLine();
-                                answered = true; //Mark as answered so other loops know to ignore!
-                            }
-                        }
                     }
 
                     //If still not answered, say it was before the oldest time we checked
-                    if (answered == false)
+                    if (ii != null)
                     {
-                        AnsiConsole.MarkupLine("[red]I looked as far back as " + ToSearch[0].ToShortDateString() + " and was unable to find a photo taken! The most recent photo was likely taken before then.[/]");
+                        //Return the most recent
+                        TimeSpan ts = DateTime.UtcNow - ii.CapturedAtUtc;
+                        AnsiConsole.MarkupLine("The last picture that was taken was taken at [bold]" + ii.CapturedAtUtc.ToString() + "[/] UTC");
+                        if (ts.TotalMinutes <= 1)
+                        {
+                            AnsiConsole.MarkupLine("That was [bold]" + ts.TotalSeconds.ToString("#,##0") + " seconds ago![/]");
+                        }
+                        else // 2 or more minutes
+                        {
+                            AnsiConsole.MarkupLine("That was [bold]" + ts.TotalMinutes.ToString("#,##0") + " minute(s) ago![/]");
+                        }
+                    }
+                    else
+                    {
+                        AnsiConsole.MarkupLine("Unable to find a photo taken in the last " + DaysToSearch.ToString() +  " days! The most recent photo was likely taken before then.[/]");
                     }
                 }
                 else if (WantToDo == "Stage 3: Rename a series of photos in sequential order")
