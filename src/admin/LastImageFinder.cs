@@ -16,7 +16,18 @@ namespace CMonitorAdministration
 
         public ImageInfo FindLastImage(string container_name, bool download = false, int days = 7)
         {
-            BlobServiceClient bsc = new BlobServiceClient(_constr);
+            //Set up BlobServiceClient
+            BlobServiceClient bsc;
+            try
+            {
+                bsc = new BlobServiceClient(_constr);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("There was an issue with the Azure Storage Connection string: " + ex.Message);
+            } 
+            
+            //Set up BlobContainerClient
             BlobContainerClient bcc = bsc.GetBlobContainerClient(container_name);
 
             //Compile a list of days we will check on
