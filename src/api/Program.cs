@@ -14,6 +14,7 @@ namespace CamMonitorAPI
             //Add azure blob storage connection string as datastore
             string path = "../azblobconstr.txt";
             string constr = System.IO.File.ReadAllText(path);
+            constr = constr.Trim();
             Console.WriteLine("Constr: " + constr);
             BlobConStr bcs = new BlobConStr(constr);
             builder.Services.AddSingleton(bcs);
